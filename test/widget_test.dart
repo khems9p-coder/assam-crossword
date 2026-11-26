@@ -1,6 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:assamcrossword/main.dart';
+import 'package:assamcrossword/widgets/menu_button.dart';
+
+Future<void> goToDashboard(WidgetTester tester) async {
+  await tester.pumpWidget(const AssamCrosswordApp());
+  await tester.pump(const Duration(seconds: 3));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Play as Guest'));
+  await tester.pumpAndSettle();
+}
+
+Future<void> openMenu(WidgetTester tester, String label) async {
+  final Finder button = find.widgetWithText(MenuButton, label);
+  await tester.ensureVisible(button);
+  await tester.pumpAndSettle();
+  await tester.tap(button);
+  await tester.pumpAndSettle();
+}
+
+Future<void> goBack(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Back'));
+  await tester.pumpAndSettle();
+}
 
 void main() {
   testWidgets('Guest picks a topic and difficulty, then opens the game',
@@ -16,8 +38,7 @@ void main() {
     expect(find.text('Guest Player'), findsOneWidget);
     expect(find.text('No topic chosen · Easy'), findsOneWidget);
 
-    await tester.tap(find.text('Select Category'));
-    await tester.pumpAndSettle();
+    await openMenu(tester, 'Select Category');
     await tester.tap(find.text('Assam General Knowledge'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Assam History'));
@@ -33,8 +54,36 @@ void main() {
     expect(find.text('Assam History'), findsOneWidget);
     expect(find.text('Hard'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Back'));
-    await tester.pumpAndSettle();
+    await goBack(tester);
     expect(find.text('Assam History · Hard'), findsOneWidget);
+  });
+
+  testWidgets('Daily Challenge, Progress, Achievements and Leaderboard open',
+      (WidgetTester tester) async {
+    await goToDashboard(tester);
+
+    await openMenu(tester, 'Daily Challenge');
+    expect(find.text('Current streak'), findsOneWidget);
+    expect(find.text("Start Today's Puzzle"), findsOneWidget);
+    await goBack(tester);
+
+    await openMenu(tester, 'My Progress');
+    expect(find.text('Puzzles completed'), findsOneWidget);
+    expect(find.text('By category'), findsOneWidget);
+    await goBack(tester);
+
+    await openMenu(tester, 'Achievements');
+    expect(find.text('0 of 11 unlocked'), findsOneWidget);
+    expect(find.text('First Puzzle'), findsOneWidget);
+    await goBack(tester);
+
+    await openMenu(tester, 'Leaderboard');
+    expect(find.text('No scores yet'), findsOneWidget);
+    await tester.tap(find.text('Medium'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Medium puzzles'), findsOneWidget);
+    await goBack(tester);
+
+    expect(find.text('Guest Player'), findsOneWidget);
   });
 }

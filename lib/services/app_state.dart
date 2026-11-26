@@ -2,8 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import '../data/category_data.dart';
 import '../models/difficulty.dart';
+import '../models/player_stats.dart';
 
-/// Remembers the player's current choices while the app is open.
+/// Remembers the player's current choices and stats while the app is open.
 /// (Saving them permanently on the device is added in Phase 6.)
 class AppState extends ChangeNotifier {
   AppState._();
@@ -12,6 +13,7 @@ class AppState extends ChangeNotifier {
 
   String? _topicId;
   Difficulty _difficulty = Difficulty.easy;
+  PlayerStats _stats = const PlayerStats();
 
   String? get topicId => _topicId;
 
@@ -22,6 +24,8 @@ class AppState extends ChangeNotifier {
 
   Difficulty get difficulty => _difficulty;
 
+  PlayerStats get stats => _stats;
+
   void selectTopic(String id) {
     _topicId = id;
     notifyListeners();
@@ -29,6 +33,11 @@ class AppState extends ChangeNotifier {
 
   void selectDifficulty(Difficulty level) {
     _difficulty = level;
+    notifyListeners();
+  }
+
+  void updateStats(PlayerStats stats) {
+    _stats = stats;
     notifyListeners();
   }
 }
