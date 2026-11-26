@@ -1,0 +1,94 @@
+import 'dart:async';
+
+import 'package:material_ui/material_ui.dart';
+
+import '../theme/app_theme.dart';
+import '../utils/constants.dart';
+import '../widgets/app_logo.dart';
+import 'welcome_screen.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(AppConstants.splashDuration, _goNext);
+  }
+
+  void _goNext() {
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.forestGreen,
+      body: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                const Spacer(),
+                const AppLogo(
+                  size: 120,
+                  backgroundColor: AppColors.cream,
+                  iconColor: AppColors.forestGreen,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  AppConstants.appName,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  AppConstants.tagline,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 15, color: Colors.white70),
+                ),
+                const Spacer(),
+                const SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(
+                    color: AppColors.gold,
+                    strokeWidth: 3,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Developed by ${AppConstants.developer}',
+                  style: TextStyle(fontSize: 13, color: Colors.white70),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

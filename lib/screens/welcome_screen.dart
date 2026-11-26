@@ -1,18 +1,17 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'setup_check_screen.dart';
+import '../theme/app_theme.dart';
+import '../utils/constants.dart';
+import '../widgets/app_logo.dart';
+import 'coming_soon_screen.dart';
+import 'home_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
-  static const Color forestGreen = Color(0xFF1B5E20);
-  static const Color cream = Color(0xFFFFF8E7);
-  static const Color gold = Color(0xFFF2B705);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: cream,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -22,61 +21,50 @@ class WelcomeScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: forestGreen,
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    child: const Icon(
-                      Icons.grid_on_rounded,
-                      size: 72,
-                      color: gold,
-                    ),
-                  ),
+                  const AppLogo(size: 120),
                   const SizedBox(height: 24),
                   const Text(
-                    'Assam Crossword',
+                    AppConstants.appName,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: forestGreen,
+                      color: AppColors.forestGreen,
                     ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Learn words. Explore Assam. Sharpen your mind.',
+                    AppConstants.tagline,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                    style: TextStyle(fontSize: 16, color: AppColors.grey),
                   ),
                   const SizedBox(height: 40),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: forestGreen,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const SetupCheckScreen(),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                      );
+                    },
+                    child: const Text('Play as Guest'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ComingSoonScreen(
+                            title: 'Login / Register',
+                            icon: Icons.lock_rounded,
                           ),
-                        );
-                      },
-                      child: const Text(
-                        'Get Started',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
+                        ),
+                      );
+                    },
+                    child: const Text('Login / Register'),
                   ),
                   const SizedBox(height: 48),
                   const Text(
-                    'Developed by KBX Studios',
-                    style: TextStyle(fontSize: 13, color: Colors.black45),
+                    'Developed by ${AppConstants.developer}',
+                    style: TextStyle(fontSize: 13, color: AppColors.grey),
                   ),
                 ],
               ),

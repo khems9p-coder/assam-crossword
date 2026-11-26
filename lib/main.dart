@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'screens/welcome_screen.dart';
+import 'screens/splash_screen.dart';
+import 'theme/app_theme.dart';
+import 'utils/constants.dart';
 
 void main() {
   runApp(const AssamCrosswordApp());
@@ -12,13 +14,10 @@ class AssamCrosswordApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Assam Crossword',
+      title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1B5E20)),
-        useMaterial3: true,
-      ),
-      home: const WelcomeScreen(),
+      theme: AppTheme.light,
+      home: const SplashScreen(),
     );
   }
 }

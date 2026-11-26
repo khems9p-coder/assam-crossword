@@ -3,17 +3,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:assamcrossword/main.dart';
 
 void main() {
-  testWidgets('Welcome screen shows title and opens Setup Check',
+  testWidgets('Splash -> Welcome -> Dashboard -> menu screen',
       (WidgetTester tester) async {
     await tester.pumpWidget(const AssamCrosswordApp());
 
     expect(find.text('Assam Crossword'), findsOneWidget);
     expect(find.text('Developed by KBX Studios'), findsOneWidget);
 
-    await tester.tap(find.text('Get Started'));
+    await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
+    expect(find.text('Play as Guest'), findsOneWidget);
+    expect(find.text('Login / Register'), findsOneWidget);
 
-    expect(find.text('Setup Check'), findsOneWidget);
-    expect(find.text('Flutter app is running'), findsOneWidget);
+    await tester.tap(find.text('Play as Guest'));
+    await tester.pumpAndSettle();
+    expect(find.text('Guest Player'), findsOneWidget);
+    expect(find.text('Play Game'), findsOneWidget);
+    expect(find.text('About Us'), findsOneWidget);
+
+    await tester.tap(find.text('Play Game'));
+    await tester.pumpAndSettle();
+    expect(find.text('This screen will be built soon.'), findsOneWidget);
   });
 }
