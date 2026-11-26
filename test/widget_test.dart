@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:assamcrossword/main.dart';
+import 'package:assamcrossword/services/app_state.dart';
 import 'package:assamcrossword/widgets/menu_button.dart';
 
 Future<void> goToDashboard(WidgetTester tester) async {
@@ -82,6 +83,38 @@ void main() {
     await tester.tap(find.text('Medium'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Medium puzzles'), findsOneWidget);
+    await goBack(tester);
+
+    expect(find.text('Guest Player'), findsOneWidget);
+  });
+
+  testWidgets('Profile, Settings, Feedback and About Us open',
+      (WidgetTester tester) async {
+    await goToDashboard(tester);
+
+    await openMenu(tester, 'My Profile');
+    expect(find.text('Playing without an account'), findsOneWidget);
+    await goBack(tester);
+
+    await openMenu(tester, 'Settings');
+    expect(AppState.instance.soundOn, isTrue);
+    await tester.tap(find.text('Sound effects'));
+    await tester.pumpAndSettle();
+    expect(AppState.instance.soundOn, isFalse);
+    await goBack(tester);
+
+    await openMenu(tester, 'Feedback');
+    final Finder send = find.text('Send Feedback');
+    await tester.ensureVisible(send);
+    await tester.pumpAndSettle();
+    await tester.tap(send);
+    await tester.pumpAndSettle();
+    expect(find.text('Please enter your name'), findsOneWidget);
+    expect(find.text('Please enter your email'), findsOneWidget);
+    await goBack(tester);
+
+    await openMenu(tester, 'About Us');
+    expect(find.text('Version 1.0.0'), findsOneWidget);
     await goBack(tester);
 
     expect(find.text('Guest Player'), findsOneWidget);

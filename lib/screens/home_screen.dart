@@ -28,10 +28,10 @@ class HomeScreen extends StatelessWidget {
     _MenuItem('My Progress', Icons.insights_rounded, AppRoutes.progress),
     _MenuItem('Achievements', Icons.emoji_events_rounded, AppRoutes.achievements),
     _MenuItem('Leaderboard', Icons.leaderboard_rounded, AppRoutes.leaderboard),
-    _MenuItem('My Profile', Icons.person_rounded),
-    _MenuItem('Settings', Icons.settings_rounded),
-    _MenuItem('Feedback', Icons.feedback_rounded),
-    _MenuItem('About Us', Icons.info_rounded),
+    _MenuItem('My Profile', Icons.person_rounded, AppRoutes.profile),
+    _MenuItem('Settings', Icons.settings_rounded, AppRoutes.settings),
+    _MenuItem('Feedback', Icons.feedback_rounded, AppRoutes.feedback),
+    _MenuItem('About Us', Icons.info_rounded, AppRoutes.about),
   ];
 
   void _open(BuildContext context, _MenuItem item) {
