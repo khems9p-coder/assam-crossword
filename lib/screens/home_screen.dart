@@ -7,6 +7,7 @@ import '../utils/app_routes.dart';
 import '../utils/constants.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/menu_button.dart';
+import '../widgets/offline_badge.dart';
 import 'coming_soon_screen.dart';
 
 class _MenuItem {
@@ -51,7 +52,10 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(AppConstants.appName)),
+      appBar: AppBar(
+        title: const Text(AppConstants.appName),
+        actions: const [OfflineBadge()],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),

@@ -41,4 +41,77 @@ class PlayerStats {
 
   double? get accuracy =>
       totalAnswers == 0 ? null : correctAnswers / totalAnswers;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'gamesPlayed': gamesPlayed,
+      'puzzlesCompleted': puzzlesCompleted,
+      'totalPoints': totalPoints,
+      'level': level,
+      'bestTimeSeconds': bestTimeSeconds,
+      'totalTimeSeconds': totalTimeSeconds,
+      'correctAnswers': correctAnswers,
+      'totalAnswers': totalAnswers,
+      'currentStreak': currentStreak,
+      'bestStreak': bestStreak,
+      'dailyCompleted': dailyCompleted,
+      'completedByArea': completedByArea,
+      'completedByDifficulty': {
+        for (final MapEntry<Difficulty, int> entry
+            in completedByDifficulty.entries)
+          entry.key.name: entry.value,
+      },
+      'unlockedAchievements': unlockedAchievements.toList(),
+    };
+  }
+
+  factory PlayerStats.fromJson(Map<String, dynamic> json) {
+    int readInt(String key, [int fallback = 0]) {
+      final Object? value = json[key];
+      return value is int ? value : fallback;
+    }
+
+    Map<String, int> readIntMap(Object? raw) {
+      final Map<String, int> result = {};
+      if (raw is Map) {
+        raw.forEach((key, value) {
+          if (key is String && value is int) {
+            result[key] = value;
+          }
+        });
+      }
+      return result;
+    }
+
+    final Map<Difficulty, int> byDifficulty = {};
+    readIntMap(json['completedByDifficulty']).forEach((key, value) {
+      for (final Difficulty level in Difficulty.values) {
+        if (level.name == key) {
+          byDifficulty[level] = value;
+        }
+      }
+    });
+
+    final Object? best = json['bestTimeSeconds'];
+    final Object? achievements = json['unlockedAchievements'];
+
+    return PlayerStats(
+      gamesPlayed: readInt('gamesPlayed'),
+      puzzlesCompleted: readInt('puzzlesCompleted'),
+      totalPoints: readInt('totalPoints'),
+      level: readInt('level', 1),
+      bestTimeSeconds: best is int ? best : null,
+      totalTimeSeconds: readInt('totalTimeSeconds'),
+      correctAnswers: readInt('correctAnswers'),
+      totalAnswers: readInt('totalAnswers'),
+      currentStreak: readInt('currentStreak'),
+      bestStreak: readInt('bestStreak'),
+      dailyCompleted: readInt('dailyCompleted'),
+      completedByArea: readIntMap(json['completedByArea']),
+      completedByDifficulty: byDifficulty,
+      unlockedAchievements: achievements is List
+          ? achievements.whereType<String>().toSet()
+          : const {},
+    );
+  }
 }

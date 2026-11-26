@@ -2,6 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:assamcrossword/main.dart';
+import 'package:assamcrossword/models/difficulty.dart';
+import 'package:assamcrossword/services/local_store.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:assamcrossword/services/app_state.dart';
 import 'package:assamcrossword/widgets/menu_button.dart';
 
@@ -154,5 +157,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Please enter your name'), findsOneWidget);
     expect(find.text('Use at least 8 characters'), findsOneWidget);
+  });
+
+  testWidgets('Choices and settings are saved on the device',
+      (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await LocalStore.instance.init();
+
+    AppState.instance.selectTopic('india_polity');
+    AppState.instance.selectDifficulty(Difficulty.medium);
+    AppState.instance.setTextScale(1.15);
+
+    final Map<String, dynamic>? selection =
+        LocalStore.instance.readJson(LocalStore.keySelection);
+    expect(selection?['topicId'], 'india_polity');
+    expect(selection?['difficulty'], 'medium');
+    final Map<String, dynamic>? settings =
+        LocalStore.instance.readJson(LocalStore.keySettings);
+    expect(settings?['textScale'], 1.15);
+
+    await AppState.instance.resetLocalData();
+    expect(AppState.instance.topicId, isNull);
+    expect(LocalStore.instance.readJson(LocalStore.keySelection), isNull);
   });
 }

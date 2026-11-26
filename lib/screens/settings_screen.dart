@@ -25,6 +25,38 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmClear(BuildContext context) async {
+    final bool? yes = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Clear local data?'),
+        content: const Text(
+          'This removes your settings, chosen topic and progress saved on '
+          'this device. Your online account is not affected.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+    if (yes != true) {
+      return;
+    }
+    await AppState.instance.resetLocalData();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Local data cleared.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final AppState state = AppState.instance;
@@ -121,6 +153,14 @@ class SettingsScreen extends StatelessWidget {
                           Navigator.of(context).pushNamed(AppRoutes.profile),
                     ),
                     ListTile(
+                      leading: const Icon(Icons.cleaning_services_rounded),
+                      title: const Text('Clear local data'),
+                      subtitle: const Text(
+                        'Remove settings and progress saved on this device',
+                      ),
+                      onTap: () => _confirmClear(context),
+                    ),
+                    ListTile(
                       leading: const Icon(Icons.privacy_tip_rounded),
                       title: const Text('Privacy Policy'),
                       trailing: const Icon(Icons.chevron_right_rounded),
@@ -152,9 +192,9 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Sounds, music and vibration are added in a later phase and '
-                'will follow these choices. Settings are kept while the app '
-                'is open and will be saved on the device in Phase 6.',
+                'Your settings are saved on this device. Sounds, music and '
+                'vibration are added in a later phase and will follow these '
+                'choices.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: AppColors.grey),
               ),
