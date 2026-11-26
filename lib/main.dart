@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'services/app_state.dart';
+import 'services/auth_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/app_routes.dart';
 import 'utils/constants.dart';
@@ -14,6 +15,7 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    AuthService.instance.start();
     debugPrint('Firebase connected: ${Firebase.app().options.projectId}');
   } catch (error) {
     // The game still works offline as a guest if Firebase can't start.

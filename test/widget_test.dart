@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:assamcrossword/main.dart';
 import 'package:assamcrossword/services/app_state.dart';
@@ -118,5 +119,40 @@ void main() {
     await goBack(tester);
 
     expect(find.text('Guest Player'), findsOneWidget);
+  });
+
+  testWidgets('Login, register and forgot-password forms check input',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const AssamCrosswordApp());
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Login / Register'));
+    await tester.pumpAndSettle();
+    final Finder loginButton = find.widgetWithText(FilledButton, 'Log In');
+    expect(loginButton, findsOneWidget);
+    await tester.tap(loginButton);
+    await tester.pumpAndSettle();
+    expect(find.text('Please enter your email'), findsOneWidget);
+    expect(find.text('Please enter your password'), findsOneWidget);
+
+    await tester.tap(find.text('Forgot password?'));
+    await tester.pumpAndSettle();
+    expect(find.text('Send Reset Link'), findsOneWidget);
+    await goBack(tester);
+
+    final Finder createLink = find.text('Create an account');
+    await tester.ensureVisible(createLink);
+    await tester.pumpAndSettle();
+    await tester.tap(createLink);
+    await tester.pumpAndSettle();
+    final Finder createButton =
+        find.widgetWithText(FilledButton, 'Create Account');
+    await tester.ensureVisible(createButton);
+    await tester.pumpAndSettle();
+    await tester.tap(createButton);
+    await tester.pumpAndSettle();
+    expect(find.text('Please enter your name'), findsOneWidget);
+    expect(find.text('Use at least 8 characters'), findsOneWidget);
   });
 }

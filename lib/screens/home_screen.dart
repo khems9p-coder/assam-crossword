@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../services/app_state.dart';
+import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_routes.dart';
 import '../utils/constants.dart';
@@ -181,50 +182,62 @@ class _WelcomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.forestGreen, AppColors.forestGreenLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: const Row(
-        children: [
-          AppLogo(
-            size: 56,
-            backgroundColor: AppColors.cream,
-            iconColor: AppColors.forestGreen,
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome,',
-                  style: TextStyle(fontSize: 14, color: Colors.white70),
-                ),
-                Text(
-                  'Guest Player',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Create an account later to save progress online.',
-                  style: TextStyle(fontSize: 12, color: Colors.white70),
-                ),
-              ],
+    final AuthService auth = AuthService.instance;
+
+    return ListenableBuilder(
+      listenable: auth,
+      builder: (context, _) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.forestGreen, AppColors.forestGreenLight],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.circular(20),
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              const AppLogo(
+                size: 56,
+                backgroundColor: AppColors.cream,
+                iconColor: AppColors.forestGreen,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Welcome,',
+                      style: TextStyle(fontSize: 14, color: Colors.white70),
+                    ),
+                    Text(
+                      auth.displayName,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      auth.isSignedIn
+                          ? 'Signed in as ${auth.email}'
+                          : 'Create an account later to save progress online.',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

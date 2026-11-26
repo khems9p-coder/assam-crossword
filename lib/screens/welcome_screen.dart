@@ -4,7 +4,6 @@ import '../theme/app_theme.dart';
 import '../utils/app_routes.dart';
 import '../utils/constants.dart';
 import '../widgets/app_logo.dart';
-import 'coming_soon_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -49,14 +48,7 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   OutlinedButton(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ComingSoonScreen(
-                            title: 'Login / Register',
-                            icon: Icons.lock_rounded,
-                          ),
-                        ),
-                      );
+                      Navigator.of(context).pushNamed(AppRoutes.login);
                     },
                     child: const Text('Login / Register'),
                   ),

@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/app_routes.dart';
 import '../utils/constants.dart';
 import '../widgets/app_logo.dart';
 import 'welcome_screen.dart';
@@ -24,10 +26,16 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _goNext() {
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-    );
+    if (!mounted) {
+      return;
+    }
+    if (AuthService.instance.isSignedIn) {
+      Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+      );
+    }
   }
 
   @override
