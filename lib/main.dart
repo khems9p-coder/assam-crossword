@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
+import 'utils/app_routes.dart';
 import 'utils/constants.dart';
 
 void main() {
@@ -18,6 +19,7 @@ class AssamCrosswordApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       home: const SplashScreen(),
+      routes: AppRoutes.routes,
     );
   }
 }

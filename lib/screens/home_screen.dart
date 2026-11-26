@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../services/app_state.dart';
 import '../theme/app_theme.dart';
+import '../utils/app_routes.dart';
 import '../utils/constants.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/menu_button.dart';
@@ -9,17 +11,19 @@ import 'coming_soon_screen.dart';
 class _MenuItem {
   final String label;
   final IconData icon;
+  final String? route;
 
-  const _MenuItem(this.label, this.icon);
+  const _MenuItem(this.label, this.icon, [this.route]);
 }
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   static const List<_MenuItem> _items = [
-    _MenuItem('Play Game', Icons.play_circle_fill_rounded),
-    _MenuItem('Select Category', Icons.category_rounded),
-    _MenuItem('Difficulty Levels', Icons.signal_cellular_alt_rounded),
+    _MenuItem('Play Game', Icons.play_circle_fill_rounded, AppRoutes.game),
+    _MenuItem('Select Category', Icons.category_rounded, AppRoutes.category),
+    _MenuItem('Difficulty Levels', Icons.signal_cellular_alt_rounded,
+        AppRoutes.difficulty),
     _MenuItem('Daily Challenge', Icons.today_rounded),
     _MenuItem('My Progress', Icons.insights_rounded),
     _MenuItem('Achievements', Icons.emoji_events_rounded),
@@ -31,6 +35,11 @@ class HomeScreen extends StatelessWidget {
   ];
 
   void _open(BuildContext context, _MenuItem item) {
+    final String? route = item.route;
+    if (route != null) {
+      Navigator.of(context).pushNamed(route);
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ComingSoonScreen(title: item.label, icon: item.icon),
@@ -80,6 +89,8 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  const _CurrentGameCard(),
                   const SizedBox(height: 24),
                   const Text(
                     'Menu',
@@ -93,12 +104,14 @@ class HomeScreen extends StatelessWidget {
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final double width = constraints.maxWidth;
-                      final int columns = width >= 700 ? 4 : (width >= 450 ? 3 : 2);
+                      final int columns =
+                          width >= 700 ? 4 : (width >= 450 ? 3 : 2);
                       return GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: _items.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: columns,
                           mainAxisSpacing: 12,
                           crossAxisSpacing: 12,
@@ -127,6 +140,38 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CurrentGameCard extends StatelessWidget {
+  const _CurrentGameCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppState state = AppState.instance;
+
+    return ListenableBuilder(
+      listenable: state,
+      builder: (context, _) {
+        final String topicName = state.topic?.name ?? 'No topic chosen';
+        return Card(
+          margin: EdgeInsets.zero,
+          child: ListTile(
+            leading: const Icon(
+              Icons.tune_rounded,
+              color: AppColors.forestGreen,
+            ),
+            title: const Text(
+              'Current game',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text('$topicName · ${state.difficulty.label}'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => Navigator.of(context).pushNamed(AppRoutes.game),
+          ),
+        );
+      },
     );
   }
 }

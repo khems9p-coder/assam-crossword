@@ -1,10 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../theme/app_theme.dart';
+import '../utils/app_routes.dart';
 import '../utils/constants.dart';
 import '../widgets/app_logo.dart';
 import 'coming_soon_screen.dart';
-import 'home_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -41,9 +41,8 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 40),
                   FilledButton(
                     onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const HomeScreen()),
-                      );
+                      Navigator.of(context)
+                          .pushReplacementNamed(AppRoutes.home);
                     },
                     child: const Text('Play as Guest'),
                   ),
