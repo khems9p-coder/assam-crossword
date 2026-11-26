@@ -3,8 +3,11 @@ import 'package:material_ui/material_ui.dart';
 import '../screens/about_screen.dart';
 import '../screens/achievement_screen.dart';
 import '../screens/category_screen.dart';
+import '../screens/change_password_screen.dart';
 import '../screens/daily_challenge_screen.dart';
+import '../screens/delete_account_screen.dart';
 import '../screens/difficulty_screen.dart';
+import '../screens/edit_profile_screen.dart';
 import '../screens/feedback_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../screens/game_screen.dart';
@@ -34,6 +37,9 @@ class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
+  static const String editProfile = '/edit-profile';
+  static const String changePassword = '/change-password';
+  static const String deleteAccount = '/delete-account';
 
   static final Map<String, WidgetBuilder> routes = {
     home: (_) => const HomeScreen(),
@@ -51,6 +57,9 @@ class AppRoutes {
     login: (_) => const LoginScreen(),
     register: (_) => const RegisterScreen(),
     forgotPassword: (_) => const ForgotPasswordScreen(),
+    editProfile: (_) => const EditProfileScreen(),
+    changePassword: (_) => const ChangePasswordScreen(),
+    deleteAccount: (_) => const DeleteAccountScreen(),
   };
 
   /// Opens the game screen and clears the category/difficulty pages

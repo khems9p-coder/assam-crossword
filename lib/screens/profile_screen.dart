@@ -55,7 +55,7 @@ class ProfileScreen extends StatelessWidget {
         final String name = auth.displayName;
         final DateTime? since = auth.memberSince;
         final String accountNote = signedIn
-            ? 'Coming in the next update'
+            ? 'Tap to open'
             : 'Available after you create an account';
 
         return Scaffold(
@@ -182,22 +182,25 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           ListTile(
-                            enabled: false,
+                            enabled: signedIn,
                             leading: const Icon(Icons.edit_rounded),
                             title: const Text('Edit profile'),
                             subtitle: Text(accountNote),
+                            onTap: () => Navigator.of(context).pushNamed(AppRoutes.editProfile),
                           ),
                           ListTile(
-                            enabled: false,
+                            enabled: signedIn,
                             leading: const Icon(Icons.lock_reset_rounded),
                             title: const Text('Change password'),
                             subtitle: Text(accountNote),
+                            onTap: () => Navigator.of(context).pushNamed(AppRoutes.changePassword),
                           ),
                           ListTile(
-                            enabled: false,
+                            enabled: signedIn,
                             leading: const Icon(Icons.delete_forever_rounded),
                             title: const Text('Delete account'),
                             subtitle: Text(accountNote),
+                            onTap: () => Navigator.of(context).pushNamed(AppRoutes.deleteAccount),
                           ),
                         ],
                       ),
