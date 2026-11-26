@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "984931050069",
+    "project_id": "assam-crossword",
+    "storage_bucket": "assam-crossword.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:984931050069:android:569314ba3236ed75256adc",
+        "android_client_info": {
+          "package_name": "com.kbxstudios.assamcrossword"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "984931050069-fh17funu78e40nn0h30uhr5he4vvtsvm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDe099SW5b4674wYIQMFCjpUtvrx_7F65E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "984931050069-fh17funu78e40nn0h30uhr5he4vvtsvm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

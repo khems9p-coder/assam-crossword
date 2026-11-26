@@ -1,12 +1,24 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'services/app_state.dart';
 import 'theme/app_theme.dart';
 import 'utils/app_routes.dart';
 import 'utils/constants.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    debugPrint('Firebase connected: ${Firebase.app().options.projectId}');
+  } catch (error) {
+    // The game still works offline as a guest if Firebase can't start.
+    debugPrint('Firebase not available: $error');
+  }
   runApp(const AssamCrosswordApp());
 }
 
