@@ -31,6 +31,7 @@ class QuestionBank {
   /// Add new question files here (and put the file in assets/data/).
   static const List<String> files = [
     'assets/data/assam_bank.json',
+    'assets/data/assam_bank_2.json',
     'assets/data/india_bank_1.json',
     'assets/data/india_bank_2.json',
     'assets/data/english_bank.json',
