@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 
-import '../data/sample_puzzles.dart';
+import '../data/question_bank.dart';
 import '../game/crossword_engine.dart';
 import '../game/puzzle_validator.dart';
 import '../models/crossword.dart';
+import '../models/difficulty.dart';
 import '../services/app_state.dart';
+import '../services/puzzle_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_routes.dart';
 import '../widgets/clue_panel.dart';
@@ -22,6 +26,8 @@ enum _Tool {
   changeDifficulty,
 }
 
+enum _AfterFinish { dashboard, replay, next }
+
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
 
@@ -30,35 +36,81 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  late final CrosswordPuzzle _puzzle;
-  late final ValidationResult _validation;
-  late final CrosswordEngine _engine;
+  late final String? _topicId;
+  late final Difficulty _difficulty;
+  int _number = 1;
+  bool _loading = true;
+  bool _needsTopic = false;
+  String? _message;
+  CrosswordPuzzle? _puzzle;
+  ValidationResult? _validation;
+  CrosswordEngine? _engine;
   bool _celebrated = false;
 
   @override
   void initState() {
     super.initState();
-    // Phase 8 will choose a real puzzle for the selected topic/difficulty.
-    _puzzle = SamplePuzzles.assamStarter;
-    _validation = PuzzleValidator.validate(_puzzle);
-    _engine = CrosswordEngine(_puzzle);
-    _engine.addListener(_onEngineChanged);
+    _topicId = AppState.instance.topicId;
+    _difficulty = AppState.instance.difficulty;
+    _prepare();
+  }
+
+  Future<void> _prepare() async {
+    if (QuestionBank.instance.isLoaded) {
+      _setUpPuzzle();
+      return;
+    }
+    await QuestionBank.instance.load();
+    if (!mounted) {
+      return;
+    }
+    setState(_setUpPuzzle);
+  }
+
+  void _setUpPuzzle() {
+    final String? topicId = _topicId;
+    _loading = false;
+    if (topicId == null) {
+      _needsTopic = true;
+      _message = 'Choose a topic to start a crossword.';
+      return;
+    }
+    _number = PuzzleService.currentNumber(topicId, _difficulty);
+    final CrosswordPuzzle? puzzle =
+        PuzzleService.build(topicId, _difficulty, _number);
+    if (puzzle == null) {
+      _needsTopic = true;
+      _message = 'Puzzles for this topic are coming soon. For now, try a '
+          'topic from Assam General Knowledge.';
+      return;
+    }
+    _puzzle = puzzle;
+    _validation = PuzzleValidator.validate(puzzle);
+    _engine = CrosswordEngine(puzzle)..addListener(_onEngineChanged);
   }
 
   @override
   void dispose() {
-    _engine.removeListener(_onEngineChanged);
-    _engine.dispose();
+    _engine?.removeListener(_onEngineChanged);
+    _engine?.dispose();
     super.dispose();
   }
 
   void _onEngineChanged() {
-    if (!_engine.isComplete) {
+    final CrosswordEngine? engine = _engine;
+    if (engine == null) {
+      return;
+    }
+    if (!engine.isComplete) {
       _celebrated = false;
       return;
     }
     if (!_celebrated) {
       _celebrated = true;
+      final String? topicId = _topicId;
+      if (topicId != null) {
+        unawaited(PuzzleService.markCompleted(topicId, _difficulty, _number));
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _showComplete();
@@ -79,7 +131,12 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _showComplete() async {
-    final bool? playAgain = await showDialog<bool>(
+    final CrosswordEngine? engine = _engine;
+    final CrosswordPuzzle? puzzle = _puzzle;
+    if (engine == null || puzzle == null) {
+      return;
+    }
+    final _AfterFinish? choice = await showDialog<_AfterFinish>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
@@ -90,20 +147,26 @@ class _GameScreenState extends State<GameScreen> {
         ),
         title: const Text('Puzzle complete!'),
         content: Text(
-          'Well done! You solved "${_puzzle.title}".\n\n'
-          'Mistakes found by checks: ${_engine.incorrectAttempts}\n'
-          'Letters revealed: ${_engine.lettersRevealed}\n'
-          'Words revealed: ${_engine.wordsRevealed}\n\n'
+          'Well done! You solved "${puzzle.title}".\n\n'
+          'Mistakes found by checks: ${engine.incorrectAttempts}\n'
+          'Letters revealed: ${engine.lettersRevealed}\n'
+          'Words revealed: ${engine.wordsRevealed}\n\n'
           'Timer, points and achievements are added in the next phases.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Back to Dashboard'),
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(_AfterFinish.dashboard),
+            child: const Text('Dashboard'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Play Again'),
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(_AfterFinish.replay),
+            child: const Text('Replay'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(_AfterFinish.next),
+            child: const Text('Next Puzzle'),
           ),
         ],
       ),
@@ -111,14 +174,18 @@ class _GameScreenState extends State<GameScreen> {
     if (!mounted) {
       return;
     }
-    if (playAgain == true) {
-      _engine.restart();
-    } else {
-      Navigator.of(context).pop();
+    switch (choice) {
+      case _AfterFinish.replay:
+        engine.restart();
+      case _AfterFinish.next:
+        Navigator.of(context).pushReplacementNamed(AppRoutes.game);
+      case _AfterFinish.dashboard:
+      case null:
+        Navigator.of(context).pop();
     }
   }
 
-  Future<void> _confirmRestart() async {
+  Future<void> _confirmRestart(CrosswordEngine engine) async {
     final bool? yes = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -137,30 +204,34 @@ class _GameScreenState extends State<GameScreen> {
       ),
     );
     if (yes == true) {
-      _engine.restart();
+      engine.restart();
     }
   }
 
   void _onTool(_Tool tool) {
+    final CrosswordEngine? engine = _engine;
+    if (engine == null) {
+      return;
+    }
     switch (tool) {
       case _Tool.checkWord:
-        final int wrong = _engine.checkWord();
+        final int wrong = engine.checkWord();
         _toast(wrong == 0
             ? 'No mistakes in this word so far.'
             : '$wrong wrong letter(s) marked in red.');
       case _Tool.checkPuzzle:
-        final int wrong = _engine.checkPuzzle();
+        final int wrong = engine.checkPuzzle();
         _toast(wrong == 0
             ? 'No mistakes in the puzzle so far.'
             : '$wrong wrong letter(s) marked in red.');
       case _Tool.revealLetter:
-        _engine.revealLetter();
+        engine.revealLetter();
       case _Tool.revealWord:
-        _engine.revealWord();
+        engine.revealWord();
       case _Tool.clearWord:
-        _engine.clearWord();
+        engine.clearWord();
       case _Tool.restart:
-        _confirmRestart();
+        _confirmRestart(engine);
       case _Tool.changeTopic:
         Navigator.of(context).pushNamed(AppRoutes.category);
       case _Tool.changeDifficulty:
@@ -168,16 +239,16 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  void _showClueSheet() {
+  void _showClueSheet(CrosswordEngine engine) {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => ListenableBuilder(
-        listenable: _engine,
+        listenable: engine,
         builder: (context, _) => SizedBox(
           height: 420,
           child: ClueList(
-            engine: _engine,
+            engine: engine,
             onClueTap: () => Navigator.of(sheetContext).pop(),
           ),
         ),
@@ -187,124 +258,179 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AppState state = AppState.instance;
-    final String topicName = state.topic?.name ?? 'Any topic';
-    final String subtitle =
-        'Practice puzzle · $topicName · ${state.difficulty.label}';
+    final CrosswordPuzzle? puzzle = _puzzle;
+    final CrosswordEngine? engine = _engine;
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(_puzzle.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Reveal a letter',
-            icon: const Icon(Icons.lightbulb_outline_rounded),
-            onPressed: () => _onTool(_Tool.revealLetter),
-          ),
-          PopupMenuButton<_Tool>(
-            tooltip: 'More options',
-            onSelected: _onTool,
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: _Tool.checkWord, child: Text('Check word')),
-              PopupMenuItem(
-                value: _Tool.checkPuzzle,
-                child: Text('Check puzzle'),
+        title: puzzle == null
+            ? const Text('Play Game')
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    puzzle.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '${_difficulty.label} · ${puzzle.words.length} words',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: Colors.white70),
+                  ),
+                ],
               ),
-              PopupMenuDivider(),
-              PopupMenuItem(
-                value: _Tool.revealLetter,
-                child: Text('Reveal letter'),
-              ),
-              PopupMenuItem(
-                value: _Tool.revealWord,
-                child: Text('Reveal word'),
-              ),
-              PopupMenuDivider(),
-              PopupMenuItem(value: _Tool.clearWord, child: Text('Clear word')),
-              PopupMenuItem(
-                value: _Tool.restart,
-                child: Text('Restart puzzle'),
-              ),
-              PopupMenuDivider(),
-              PopupMenuItem(
-                value: _Tool.changeTopic,
-                child: Text('Change topic'),
-              ),
-              PopupMenuItem(
-                value: _Tool.changeDifficulty,
-                child: Text('Change difficulty'),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: !_validation.isValid
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  'This puzzle has a problem and cannot be played:\n\n'
-                  '${_validation.errors.join('\n')}',
-                  textAlign: TextAlign.center,
+        actions: engine == null
+            ? null
+            : [
+                IconButton(
+                  tooltip: 'Reveal a letter',
+                  icon: const Icon(Icons.lightbulb_outline_rounded),
+                  onPressed: () => _onTool(_Tool.revealLetter),
                 ),
-              ),
-            )
-          : ListenableBuilder(
-              listenable: _engine,
-              builder: (context, _) {
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final bool wide = constraints.maxWidth >= 900;
-                    final Widget board = Column(
-                      children: [
-                        ActiveClueBar(engine: _engine),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: CrosswordGrid(engine: _engine),
-                          ),
-                        ),
-                        _ProgressRow(
-                          engine: _engine,
-                          onShowClues: wide ? null : _showClueSheet,
-                        ),
-                        GameKeyboard(
-                          onLetter: _engine.enterLetter,
-                          onBackspace: _engine.backspace,
-                        ),
-                      ],
-                    );
-                    if (!wide) {
-                      return SafeArea(top: false, child: board);
-                    }
-                    return SafeArea(
-                      top: false,
-                      child: Row(
-                        children: [
-                          Expanded(child: board),
-                          const VerticalDivider(width: 1),
-                          SizedBox(
-                            width: 340,
-                            child: ClueList(engine: _engine),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
+                PopupMenuButton<_Tool>(
+                  tooltip: 'More options',
+                  onSelected: _onTool,
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(
+                      value: _Tool.checkWord,
+                      child: Text('Check word'),
+                    ),
+                    PopupMenuItem(
+                      value: _Tool.checkPuzzle,
+                      child: Text('Check puzzle'),
+                    ),
+                    PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: _Tool.revealLetter,
+                      child: Text('Reveal letter'),
+                    ),
+                    PopupMenuItem(
+                      value: _Tool.revealWord,
+                      child: Text('Reveal word'),
+                    ),
+                    PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: _Tool.clearWord,
+                      child: Text('Clear word'),
+                    ),
+                    PopupMenuItem(
+                      value: _Tool.restart,
+                      child: Text('Restart puzzle'),
+                    ),
+                    PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: _Tool.changeTopic,
+                      child: Text('Change topic'),
+                    ),
+                    PopupMenuItem(
+                      value: _Tool.changeDifficulty,
+                      child: Text('Change difficulty'),
+                    ),
+                  ],
+                ),
+              ],
+      ),
+      body: _buildBody(engine),
+    );
+  }
+
+  Widget _buildBody(CrosswordEngine? engine) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final String? message = _message;
+    if (engine == null || message != null) {
+      return Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.category_rounded,
+                  size: 64,
+                  color: AppColors.forestGreen,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message ?? 'No puzzle available.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                if (_needsTopic) ...[
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed(AppRoutes.category),
+                    child: const Text('Choose Topic'),
+                  ),
+                ],
+              ],
             ),
+          ),
+        ),
+      );
+    }
+
+    final ValidationResult? validation = _validation;
+    if (validation != null && !validation.isValid) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'This puzzle has a problem and cannot be played:\n\n'
+            '${validation.errors.join('\n')}',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    return ListenableBuilder(
+      listenable: engine,
+      builder: (context, _) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final bool wide = constraints.maxWidth >= 900;
+            final Widget board = Column(
+              children: [
+                ActiveClueBar(engine: engine),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: CrosswordGrid(engine: engine),
+                  ),
+                ),
+                _ProgressRow(
+                  engine: engine,
+                  onShowClues: wide ? null : () => _showClueSheet(engine),
+                ),
+                GameKeyboard(
+                  onLetter: engine.enterLetter,
+                  onBackspace: engine.backspace,
+                ),
+              ],
+            );
+            if (!wide) {
+              return SafeArea(top: false, child: board);
+            }
+            return SafeArea(
+              top: false,
+              child: Row(
+                children: [
+                  Expanded(child: board),
+                  const VerticalDivider(width: 1),
+                  SizedBox(width: 340, child: ClueList(engine: engine)),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

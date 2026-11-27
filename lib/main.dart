@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'data/question_bank.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'services/app_state.dart';
@@ -23,6 +24,9 @@ Future<void> main() async {
   } catch (error) {
     debugPrint('Local storage not available: $error');
   }
+
+  // Load the built-in question bank (works offline).
+  await QuestionBank.instance.load();
 
   // 2. Start watching the internet connection.
   unawaited(ConnectivityService.instance.start());

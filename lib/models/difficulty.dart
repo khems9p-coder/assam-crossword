@@ -6,14 +6,14 @@ enum Difficulty {
     description:
         'Short, familiar words and simple clues on a small grid. Great for children and beginners.',
     icon: Icons.sentiment_satisfied_rounded,
-    gridSize: 7,
+    gridSize: 9,
   ),
   medium(
     label: 'Medium',
     description:
         'Moderate vocabulary, more detailed clues and general knowledge on a medium grid.',
     icon: Icons.psychology_rounded,
-    gridSize: 10,
+    gridSize: 11,
   ),
   hard(
     label: 'Hard',

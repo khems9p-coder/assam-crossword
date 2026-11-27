@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'package:assamcrossword/data/question_bank.dart';
 import 'package:assamcrossword/main.dart';
 import 'package:assamcrossword/models/difficulty.dart';
 import 'package:assamcrossword/services/local_store.dart';
@@ -32,6 +33,7 @@ Future<void> goBack(WidgetTester tester) async {
 void main() {
   testWidgets('Guest picks a topic and difficulty, then opens the game',
       (WidgetTester tester) async {
+    await tester.runAsync(() => QuestionBank.instance.load());
     await tester.pumpWidget(const AssamCrosswordApp());
     expect(find.text('Assam Crossword'), findsOneWidget);
     expect(find.text('Developed by KBX Studios'), findsOneWidget);
@@ -183,9 +185,12 @@ void main() {
 
   testWidgets('The crossword can be played with the on-screen keyboard',
       (WidgetTester tester) async {
+    await tester.runAsync(() => QuestionBank.instance.load());
+    AppState.instance.selectTopic('assam_wildlife');
+    AppState.instance.selectDifficulty(Difficulty.easy);
     await goToDashboard(tester);
     await openMenu(tester, 'Play Game');
-    expect(find.text("Assam's world-famous plantation crop"), findsWidgets);
+    expect(find.textContaining('Birds and Animals'), findsOneWidget);
 
     await tester.tap(find.text('T'));
     await tester.pump();

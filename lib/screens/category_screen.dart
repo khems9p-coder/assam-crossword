@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../data/category_data.dart';
+import '../data/question_bank.dart';
 import '../services/app_state.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_routes.dart';
@@ -52,6 +53,9 @@ class CategoryScreen extends StatelessWidget {
                         for (final Topic topic in area.topics)
                           ListTile(
                             title: Text(topic.name),
+                            subtitle: QuestionBank.instance.hasPuzzles(topic.id)
+                                ? null
+                                : const Text('Puzzles coming soon'),
                             selected: topic.id == selectedId,
                             selectedColor: AppColors.forestGreen,
                             trailing: Icon(
