@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Needed for accounts, cloud save, leaderboard and feedback.
+         Debug builds add it on their own; the released app needs it here. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <application
         android:label="Assam Crossword"
         android:name="${applicationName}"
@@ -40,6 +44,16 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Lets the app open web pages, the Play Store and the email app
+             (About, Privacy Policy, Rate, Feedback by email). -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="mailto"/>
         </intent>
     </queries>
 </manifest>

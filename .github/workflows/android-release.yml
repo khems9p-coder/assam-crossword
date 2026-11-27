@@ -1,0 +1,65 @@
+# Builds the Android app on GitHub's computers, because Codespaces has no
+# Android SDK. Run it from the Actions tab: "Android release build" > Run workflow.
+# The finished files appear at the bottom of the run's page, under Artifacts.
+name: Android release build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      # 'true' once the upload key has been added in Settings > Secrets.
+      HAS_UPLOAD_KEY: ${{ secrets.KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.50.1'
+          channel: stable
+          cache: true
+
+      - name: Get packages
+        run: flutter pub get
+
+      - name: Check the code and run the tests
+        run: flutter analyze && flutter test
+
+      - name: Set up the upload key
+        if: env.HAS_UPLOAD_KEY == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=upload-keystore.jks\n' \
+            "$KEYSTORE_PASSWORD" "$KEY_PASSWORD" "$KEY_ALIAS" > android/key.properties
+
+      - name: Build the Play Store bundle (.aab)
+        run: flutter build appbundle --release
+
+      - name: Build an installable app (.apk) for testing
+        run: flutter build apk --release
+
+      - name: Upload the results
+        uses: actions/upload-artifact@v4
+        with:
+          name: assam-crossword-${{ env.HAS_UPLOAD_KEY == 'true' && 'signed' || 'TEST-ONLY-debug-signed' }}
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
+
+      - name: Remove the key from the build computer
+        if: always()
+        run: rm -f android/app/upload-keystore.jks android/key.properties
