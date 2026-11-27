@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
+import 'cloud_service.dart';
+
 /// A friendly error message to show the player.
 class AuthFailure implements Exception {
   final String message;
@@ -162,13 +164,21 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  /// Permanently deletes the Firebase account.
-  /// When cloud progress is added (Phase 12), the player's cloud data
-  /// will be deleted here first, before the account itself.
+  /// Permanently deletes the Firebase account. The player's online data
+  /// (progress and leaderboard row) is deleted first; if that fails, the
+  /// account is kept so nothing is left behind.
   Future<void> deleteAccount(String currentPassword) async {
     final User current = _requireUser();
     try {
       await _reauthenticate(current, currentPassword);
+      try {
+        await CloudService.instance.deleteMyData(current.uid);
+      } catch (_) {
+        throw const AuthFailure(
+          'Could not delete your online data. Check your internet '
+          'connection and try again. Your account was not deleted.',
+        );
+      }
       await current.delete();
     } on FirebaseAuthException catch (e) {
       throw AuthFailure(_friendlyMessage(e, checkingPassword: true));

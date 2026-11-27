@@ -82,6 +82,46 @@ class PlayerStats {
     );
   }
 
+  /// Joins progress from two places (this device and the cloud),
+  /// keeping the higher number of each, the faster best time and every
+  /// unlocked achievement.
+  static PlayerStats merge(PlayerStats a, PlayerStats b) {
+    int most(int x, int y) => x > y ? x : y;
+
+    Map<K, int> mostOf<K>(Map<K, int> x, Map<K, int> y) => {
+          for (final K key in {...x.keys, ...y.keys})
+            key: most(x[key] ?? 0, y[key] ?? 0),
+        };
+
+    final int? ta = a.bestTimeSeconds;
+    final int? tb = b.bestTimeSeconds;
+    final int points = most(a.totalPoints, b.totalPoints);
+
+    return PlayerStats(
+      gamesPlayed: most(a.gamesPlayed, b.gamesPlayed),
+      puzzlesCompleted: most(a.puzzlesCompleted, b.puzzlesCompleted),
+      totalPoints: points,
+      level: 1 + points ~/ 500,
+      bestTimeSeconds:
+          ta == null ? tb : (tb == null ? ta : (ta < tb ? ta : tb)),
+      totalTimeSeconds: most(a.totalTimeSeconds, b.totalTimeSeconds),
+      correctAnswers: most(a.correctAnswers, b.correctAnswers),
+      totalAnswers: most(a.totalAnswers, b.totalAnswers),
+      // The streak depends on this device's daily record, so keep it.
+      currentStreak: a.currentStreak,
+      bestStreak: most(a.bestStreak, b.bestStreak),
+      dailyCompleted: most(a.dailyCompleted, b.dailyCompleted),
+      completedByArea: mostOf(a.completedByArea, b.completedByArea),
+      completedByTopic: mostOf(a.completedByTopic, b.completedByTopic),
+      completedByDifficulty:
+          mostOf(a.completedByDifficulty, b.completedByDifficulty),
+      unlockedAchievements: {
+        ...a.unlockedAchievements,
+        ...b.unlockedAchievements,
+      },
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'gamesPlayed': gamesPlayed,

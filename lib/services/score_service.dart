@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../data/category_data.dart';
 import '../game/crossword_engine.dart';
 import '../models/achievement.dart';
@@ -5,6 +7,7 @@ import '../models/difficulty.dart';
 import '../models/player_stats.dart';
 import 'achievement_service.dart';
 import 'app_state.dart';
+import 'cloud_service.dart';
 import 'daily_service.dart';
 import 'local_store.dart';
 
@@ -185,6 +188,7 @@ class ScoreService {
       );
     }
     AppState.instance.updateStats(updated);
+    unawaited(CloudService.instance.push());
 
     return GameResult(
       seconds: seconds,

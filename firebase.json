@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"assam-crossword","appId":"1:984931050069:android:569314ba3236ed75256adc","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"assam-crossword","configurations":{"android":"1:984931050069:android:569314ba3236ed75256adc","web":"1:984931050069:web:c9b4631e0cc8e6c9256adc"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "assam-crossword",
+          "appId": "1:984931050069:android:569314ba3236ed75256adc",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "assam-crossword",
+          "configurations": {
+            "android": "1:984931050069:android:569314ba3236ed75256adc",
+            "web": "1:984931050069:web:c9b4631e0cc8e6c9256adc"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

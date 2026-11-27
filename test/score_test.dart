@@ -5,6 +5,7 @@ import 'package:assamcrossword/data/sample_puzzles.dart';
 import 'package:assamcrossword/game/crossword_engine.dart';
 import 'package:assamcrossword/models/crossword.dart';
 import 'package:assamcrossword/models/difficulty.dart';
+import 'package:assamcrossword/models/player_stats.dart';
 import 'package:assamcrossword/services/app_state.dart';
 import 'package:assamcrossword/services/local_store.dart';
 import 'package:assamcrossword/services/score_service.dart';
@@ -66,6 +67,33 @@ void main() {
       ),
       10,
     );
+  });
+
+  test('progress from two devices is merged', () {
+    const PlayerStats phone = PlayerStats(
+      puzzlesCompleted: 5,
+      totalPoints: 900,
+      bestTimeSeconds: 80,
+      currentStreak: 2,
+      completedByTopic: {'assam_history': 2},
+      unlockedAchievements: {'first_puzzle'},
+    );
+    const PlayerStats cloud = PlayerStats(
+      puzzlesCompleted: 3,
+      totalPoints: 1200,
+      bestTimeSeconds: 60,
+      currentStreak: 9,
+      completedByTopic: {'assam_history': 1, 'eng_idioms': 4},
+      unlockedAchievements: {'puzzles_10'},
+    );
+    final PlayerStats merged = PlayerStats.merge(phone, cloud);
+    expect(merged.puzzlesCompleted, 5);
+    expect(merged.totalPoints, 1200);
+    expect(merged.level, 3);
+    expect(merged.bestTimeSeconds, 60);
+    expect(merged.currentStreak, 2);
+    expect(merged.completedByTopic, {'assam_history': 2, 'eng_idioms': 4});
+    expect(merged.unlockedAchievements, {'first_puzzle', 'puzzles_10'});
   });
 
   test('stars depend on hints and mistakes', () {

@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'services/app_state.dart';
 import 'services/auth_service.dart';
+import 'services/cloud_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/daily_service.dart';
 import 'services/local_store.dart';
@@ -43,6 +44,7 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     AuthService.instance.start();
+    CloudService.instance.start();
     debugPrint('Firebase connected: ${Firebase.app().options.projectId}');
   } catch (error) {
     debugPrint('Firebase not available: $error');
