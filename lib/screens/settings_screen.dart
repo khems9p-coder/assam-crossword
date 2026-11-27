@@ -4,7 +4,6 @@ import '../services/app_state.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_routes.dart';
 import '../widgets/stat_tile.dart';
-import 'coming_soon_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -16,14 +15,6 @@ class SettingsScreen extends StatelessWidget {
     'Large',
     'Extra large',
   ];
-
-  void _openComingSoon(BuildContext context, String title, IconData icon) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ComingSoonScreen(title: title, icon: icon),
-      ),
-    );
-  }
 
   Future<void> _confirmClear(BuildContext context) async {
     final bool? yes = await showDialog<bool>(
@@ -204,21 +195,15 @@ class SettingsScreen extends StatelessWidget {
                       leading: const Icon(Icons.privacy_tip_rounded),
                       title: const Text('Privacy Policy'),
                       trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => _openComingSoon(
-                        context,
-                        'Privacy Policy',
-                        Icons.privacy_tip_rounded,
-                      ),
+                      onTap: () =>
+                          Navigator.of(context).pushNamed(AppRoutes.privacy),
                     ),
                     ListTile(
                       leading: const Icon(Icons.description_rounded),
                       title: const Text('Terms and Conditions'),
                       trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => _openComingSoon(
-                        context,
-                        'Terms and Conditions',
-                        Icons.description_rounded,
-                      ),
+                      onTap: () =>
+                          Navigator.of(context).pushNamed(AppRoutes.terms),
                     ),
                     ListTile(
                       leading: const Icon(Icons.info_rounded),

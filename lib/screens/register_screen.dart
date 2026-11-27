@@ -6,7 +6,6 @@ import '../utils/app_routes.dart';
 import '../utils/validators.dart';
 import '../widgets/form_message.dart';
 import '../widgets/password_field.dart';
-import 'coming_soon_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -152,16 +151,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const Expanded(child: Text('I accept the')),
                       TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const ComingSoonScreen(
-                                title: 'Privacy Policy',
-                                icon: Icons.privacy_tip_rounded,
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: () => Navigator.of(context)
+                            .pushNamed(AppRoutes.privacy),
                         child: const Text('Privacy Policy'),
                       ),
                     ],

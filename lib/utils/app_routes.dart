@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../screens/about_screen.dart';
+import '../screens/legal_screen.dart';
 import '../screens/achievement_screen.dart';
 import '../screens/category_screen.dart';
 import '../screens/change_password_screen.dart';
@@ -35,6 +36,8 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String feedback = '/feedback';
   static const String about = '/about';
+  static const String privacy = '/privacy';
+  static const String terms = '/terms';
   static const String login = '/login';
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
@@ -56,6 +59,8 @@ class AppRoutes {
     settings: (_) => const SettingsScreen(),
     feedback: (_) => const FeedbackScreen(),
     about: (_) => const AboutScreen(),
+    privacy: (_) => const LegalScreen(doc: LegalDoc.privacy),
+    terms: (_) => const LegalScreen(doc: LegalDoc.terms),
     login: (_) => const LoginScreen(),
     register: (_) => const RegisterScreen(),
     forgotPassword: (_) => const ForgotPasswordScreen(),

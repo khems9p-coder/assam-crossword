@@ -1,0 +1,147 @@
+{
+  "updated": "27 November 2026",
+  "developer": "KBX Studios",
+  "email": "kbxchetry@gmail.com",
+  "privacy": {
+    "title": "Privacy Policy",
+    "intro": "This Privacy Policy explains what information the Assam Crossword app (\"the app\") collects, why, and how you can control it. The app is made by KBX Studios.",
+    "sections": [
+      {
+        "heading": "1. Playing as a guest",
+        "paragraphs": [
+          "You can play without an account. As a guest, your progress, scores, best times, achievements and settings are saved only on your device. Nothing is sent to us.",
+          "You can remove this data at any time with Settings > Clear local data, or by uninstalling the app."
+        ]
+      },
+      {
+        "heading": "2. Creating an account",
+        "paragraphs": [
+          "If you create an account, we collect your email address, the display name you choose, and your password. Accounts are handled by Firebase Authentication, a service of Google. Your password goes directly to Firebase; the app never stores or sees it after you type it.",
+          "Your game progress (points, level, puzzles completed, best times, streaks and achievements) is saved in Cloud Firestore, a Google database, so it can be restored on another device."
+        ]
+      },
+      {
+        "heading": "3. The leaderboard",
+        "paragraphs": [
+          "If you have an account, your display name, points, level and number of puzzles completed are shown on the public leaderboard to other players. Please do not use your full real name or anything private as your display name. Guests are not shown on the leaderboard."
+        ]
+      },
+      {
+        "heading": "4. Feedback",
+        "paragraphs": [
+          "If you send feedback by email or through the app, we receive the message and any name or email address you include. We use it only to reply to you and to improve the app."
+        ]
+      },
+      {
+        "heading": "5. What we do not collect",
+        "paragraphs": [
+          "The app has no advertising and no advertising trackers. It does not use analytics. It does not access your location, contacts, camera, microphone, photos or files. We do not sell or rent your information to anyone."
+        ]
+      },
+      {
+        "heading": "6. Where your data is stored",
+        "paragraphs": [
+          "Account and progress data are stored by Google Firebase. The Cloud Firestore database for this app is located in Mumbai, India (asia-south1). Data is sent over encrypted (HTTPS) connections.",
+          "Google's own privacy policy applies to its services: https://policies.google.com/privacy"
+        ]
+      },
+      {
+        "heading": "7. How long we keep it",
+        "paragraphs": [
+          "We keep your account and progress until you delete your account. Feedback emails are kept only as long as needed to deal with them."
+        ]
+      },
+      {
+        "heading": "8. Deleting your account and data",
+        "paragraphs": [
+          "You can delete your account inside the app: My Profile > Delete Account. This permanently deletes your account, your saved progress and your leaderboard entry. If you cannot use the app, email us from your account's email address and we will delete it for you."
+        ]
+      },
+      {
+        "heading": "9. Children",
+        "paragraphs": [
+          "The app is intended for players aged 13 and over. Younger children can play as guests, which does not send any personal information to us. If you believe a child under 13 has created an account, contact us and we will delete it."
+        ]
+      },
+      {
+        "heading": "10. Changes to this policy",
+        "paragraphs": [
+          "If we change this policy, we will update the date at the top and publish the new version in the app and on our website."
+        ]
+      },
+      {
+        "heading": "11. Contact",
+        "paragraphs": [
+          "Questions or requests about your data: kbxchetry@gmail.com (KBX Studios)."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "intro": "By using the Assam Crossword app (\"the app\"), made by KBX Studios, you agree to these terms. If you do not agree, please do not use the app.",
+    "sections": [
+      {
+        "heading": "1. Using the app",
+        "paragraphs": [
+          "The app is free to use for personal, educational and non-commercial purposes. You may play as a guest or create an account."
+        ]
+      },
+      {
+        "heading": "2. Your account",
+        "paragraphs": [
+          "You are responsible for keeping your password safe and for activity on your account. Give a correct email address so that you can reset your password if needed."
+        ]
+      },
+      {
+        "heading": "3. Fair play and display names",
+        "paragraphs": [
+          "Do not cheat, attack or misuse the app or its servers, or try to change other players' data or scores. Do not use display names that are offensive, hateful, impersonate someone else or contain personal information.",
+          "We may remove leaderboard entries or suspend accounts that break these rules."
+        ]
+      },
+      {
+        "heading": "4. Educational content",
+        "paragraphs": [
+          "The questions and clues are written with care for learning and exam practice, but they may contain mistakes or become out of date. Always check important facts with official sources. If you find an error, please tell us through Feedback."
+        ]
+      },
+      {
+        "heading": "5. Ownership",
+        "paragraphs": [
+          "The app, its design and its question content belong to KBX Studios. You may not copy, sell or republish them without permission."
+        ]
+      },
+      {
+        "heading": "6. No warranty",
+        "paragraphs": [
+          "The app is provided \"as is\". We try to keep it working and accurate, but we do not promise that it will always be available, error-free or that your progress can never be lost."
+        ]
+      },
+      {
+        "heading": "7. Limitation of liability",
+        "paragraphs": [
+          "To the extent allowed by law, KBX Studios is not responsible for any loss or damage resulting from the use of the app."
+        ]
+      },
+      {
+        "heading": "8. Changes",
+        "paragraphs": [
+          "We may update the app and these terms. The date at the top shows the latest version. Continuing to use the app means you accept the updated terms."
+        ]
+      },
+      {
+        "heading": "9. Governing law",
+        "paragraphs": [
+          "These terms are governed by the laws of India."
+        ]
+      },
+      {
+        "heading": "10. Contact",
+        "paragraphs": [
+          "kbxchetry@gmail.com (KBX Studios)."
+        ]
+      }
+    ]
+  }
+}

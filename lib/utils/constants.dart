@@ -13,4 +13,18 @@ class AppConstants {
   static const String developer = 'KBX Studios';
   static const String contactEmail = 'kbxchetry@gmail.com';
   static const Duration splashDuration = Duration(seconds: 2);
+
+  /// The app's page on Google Play (works once the app is published).
+  static const String playStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.kbxstudios.assamcrossword';
+
+  /// Public web pages (GitHub Pages, made from assets/data/legal.json).
+  static const String privacyPolicyUrl =
+      'https://khems9p-coder.github.io/assam-crossword/privacy-policy.html';
+  static const String termsUrl =
+      'https://khems9p-coder.github.io/assam-crossword/terms.html';
+
+  static const String shareMessage =
+      'Try Assam Crossword! Learn Assam GK, India GK and English '
+      'vocabulary through crosswords. $playStoreUrl';
 }

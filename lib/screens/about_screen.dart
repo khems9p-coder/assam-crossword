@@ -5,8 +5,8 @@ import '../services/contact_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/constants.dart';
 import '../widgets/app_logo.dart';
+import '../utils/app_routes.dart';
 import '../widgets/stat_tile.dart';
-import 'coming_soon_screen.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -27,12 +27,26 @@ class AboutScreen extends StatelessWidget {
     }
   }
 
-  void _openComingSoon(BuildContext context, String title, IconData icon) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ComingSoonScreen(title: title, icon: icon),
-      ),
-    );
+  Future<void> _shareApp(BuildContext context) async {
+    final bool shared = await ContactService.shareApp();
+    if (!shared && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Message copied. Paste it to share with friends.'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _rateApp(BuildContext context) async {
+    final bool opened = await ContactService.openStorePage();
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Couldn't open the Play Store right now."),
+        ),
+      );
+    }
   }
 
   @override
@@ -114,6 +128,29 @@ class AboutScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+                const SectionTitle('Share'),
+                Card(
+                  margin: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.share_rounded),
+                        title: const Text('Share the app'),
+                        subtitle: const Text('Tell friends and classmates'),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => _shareApp(context),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.star_rate_rounded),
+                        title: const Text('Rate the app'),
+                        subtitle: const Text('On the Google Play Store'),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => _rateApp(context),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
                 const SectionTitle('Legal'),
                 Card(
                   margin: EdgeInsets.zero,
@@ -123,21 +160,15 @@ class AboutScreen extends StatelessWidget {
                         leading: const Icon(Icons.privacy_tip_rounded),
                         title: const Text('Privacy Policy'),
                         trailing: const Icon(Icons.chevron_right_rounded),
-                        onTap: () => _openComingSoon(
-                          context,
-                          'Privacy Policy',
-                          Icons.privacy_tip_rounded,
-                        ),
+                        onTap: () =>
+                            Navigator.of(context).pushNamed(AppRoutes.privacy),
                       ),
                       ListTile(
                         leading: const Icon(Icons.description_rounded),
                         title: const Text('Terms and Conditions'),
                         trailing: const Icon(Icons.chevron_right_rounded),
-                        onTap: () => _openComingSoon(
-                          context,
-                          'Terms and Conditions',
-                          Icons.description_rounded,
-                        ),
+                        onTap: () =>
+                            Navigator.of(context).pushNamed(AppRoutes.terms),
                       ),
                       ListTile(
                         leading: const Icon(Icons.article_rounded),
