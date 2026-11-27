@@ -9,14 +9,13 @@ import '../utils/constants.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/menu_button.dart';
 import '../widgets/offline_badge.dart';
-import 'coming_soon_screen.dart';
 
 class _MenuItem {
   final String label;
   final IconData icon;
-  final String? route;
+  final String route;
 
-  const _MenuItem(this.label, this.icon, [this.route]);
+  const _MenuItem(this.label, this.icon, this.route);
 }
 
 class HomeScreen extends StatelessWidget {
@@ -38,16 +37,7 @@ class HomeScreen extends StatelessWidget {
   ];
 
   void _open(BuildContext context, _MenuItem item) {
-    final String? route = item.route;
-    if (route != null) {
-      Navigator.of(context).pushNamed(route);
-      return;
-    }
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ComingSoonScreen(title: item.label, icon: item.icon),
-      ),
-    );
+    Navigator.of(context).pushNamed(item.route);
   }
 
   @override

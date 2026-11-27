@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:material_ui/material_ui.dart';
 
 import 'data/legal_text.dart';
@@ -15,6 +16,7 @@ import 'services/daily_service.dart';
 import 'services/feedback_service.dart';
 import 'services/local_store.dart';
 import 'services/sound_service.dart';
+import 'services/startup.dart';
 import 'theme/app_theme.dart';
 import 'utils/app_routes.dart';
 import 'utils/constants.dart';
@@ -37,13 +39,38 @@ Future<void> main() async {
   // Load the sound effects (the game stays quiet if this fails).
   unawaited(SoundService.instance.init());
 
-  // Load the built-in question bank (works offline).
-  await QuestionBank.instance.load();
-
   // 2. Start watching the internet connection.
   unawaited(ConnectivityService.instance.start());
 
-  // 3. Connect to Firebase (accounts). The game still works without it.
+  // 3. Questions and Firebase load while the splash screen shows, so the
+  //    app appears at once instead of after a blank screen.
+  Startup.begin(_loadInBackground());
+
+  // A friendly message instead of a grey box if a screen ever breaks
+  // in the released app. Debug builds keep Flutter's detailed error.
+  if (kReleaseMode) {
+    ErrorWidget.builder = (FlutterErrorDetails details) => const Material(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'Something went wrong on this screen.\n'
+                'Please go back and try again.',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        );
+  }
+
+  runApp(const AssamCrosswordApp());
+}
+
+Future<void> _loadInBackground() async {
+  // The built-in question bank (works offline).
+  await QuestionBank.instance.load();
+
+  // Firebase (accounts, cloud save). The game still works without it.
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -55,8 +82,6 @@ Future<void> main() async {
   } catch (error) {
     debugPrint('Firebase not available: $error');
   }
-
-  runApp(const AssamCrosswordApp());
 }
 
 class AssamCrosswordApp extends StatelessWidget {
