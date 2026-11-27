@@ -484,19 +484,32 @@ class _GameScreenState extends State<GameScreen>
       builder: (context, _) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            final bool wide = constraints.maxWidth >= 900;
+            final double w = constraints.maxWidth;
+            final double h = constraints.maxHeight;
+            // Side panel: big screens, or any screen held sideways.
+            final bool side = w >= 900 || (w > h && w >= 640);
+            // Clue tabs under the grid: tall screens such as tablets
+            // held upright.
+            final bool tabs = !side && h >= 720 && w >= 500;
             final Widget board = Column(
               children: [
                 ActiveClueBar(engine: engine),
                 Expanded(
+                  flex: tabs ? 3 : 1,
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: CrosswordGrid(engine: engine),
                   ),
                 ),
+                if (tabs) ...[
+                  const Divider(height: 1),
+                  Expanded(flex: 2, child: ClueTabs(engine: engine)),
+                  const Divider(height: 1),
+                ],
                 _ProgressRow(
                   engine: engine,
-                  onShowClues: wide ? null : () => _showClueSheet(engine),
+                  onShowClues:
+                      side || tabs ? null : () => _showClueSheet(engine),
                 ),
                 GameKeyboard(
                   onLetter: engine.enterLetter,
@@ -504,7 +517,7 @@ class _GameScreenState extends State<GameScreen>
                 ),
               ],
             );
-            if (!wide) {
+            if (!side) {
               return SafeArea(top: false, child: board);
             }
             return SafeArea(
@@ -513,7 +526,10 @@ class _GameScreenState extends State<GameScreen>
                 children: [
                   Expanded(child: board),
                   const VerticalDivider(width: 1),
-                  SizedBox(width: 340, child: ClueList(engine: engine)),
+                  SizedBox(
+                    width: w >= 900 ? 340 : 260,
+                    child: ClueList(engine: engine),
+                  ),
                 ],
               ),
             );
@@ -554,12 +570,18 @@ class _ProgressRow extends StatelessWidget {
             '${(engine.completion * 100).round()}%',
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          if (showClues != null)
-            TextButton.icon(
+          if (showClues != null) ...[
+            const SizedBox(width: 10),
+            FilledButton.tonalIcon(
               onPressed: showClues,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, 40),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+              ),
               icon: const Icon(Icons.list_alt_rounded),
-              label: const Text('All clues'),
+              label: const Text('Clues'),
             ),
+          ],
         ],
       ),
     );
