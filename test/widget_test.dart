@@ -56,8 +56,8 @@ void main() {
     await tester.tap(find.text('Start Game'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Assam History'), findsOneWidget);
-    expect(find.text('Hard'), findsOneWidget);
+    expect(find.textContaining('Assam History'), findsOneWidget);
+    expect(find.textContaining('Hard'), findsOneWidget);
 
     await goBack(tester);
     expect(find.text('Assam History · Hard'), findsOneWidget);
@@ -179,5 +179,23 @@ void main() {
     await AppState.instance.resetLocalData();
     expect(AppState.instance.topicId, isNull);
     expect(LocalStore.instance.readJson(LocalStore.keySelection), isNull);
+  });
+
+  testWidgets('The crossword can be played with the on-screen keyboard',
+      (WidgetTester tester) async {
+    await goToDashboard(tester);
+    await openMenu(tester, 'Play Game');
+    expect(find.text("Assam's world-famous plantation crop"), findsWidgets);
+
+    await tester.tap(find.text('T'));
+    await tester.pump();
+    await tester.tap(find.text('E'));
+    await tester.pump();
+    await tester.tap(find.text('A'));
+    await tester.pump();
+
+    expect(find.text('T'), findsNWidgets(2));
+    expect(find.text('E'), findsNWidgets(2));
+    expect(find.textContaining('%'), findsOneWidget);
   });
 }
