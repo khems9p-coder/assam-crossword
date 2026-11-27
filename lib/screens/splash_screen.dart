@@ -47,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.forestGreen,
+      backgroundColor: AppColors.brand,
       body: SafeArea(
         child: SizedBox(
           width: double.infinity,
@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               children: [
                 const Spacer(),
-                const AppLogo(
+                AppLogo(
                   size: 120,
                   backgroundColor: AppColors.cream,
                   iconColor: AppColors.forestGreen,

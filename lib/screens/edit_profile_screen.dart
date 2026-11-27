@@ -89,7 +89,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'Email: ${AuthService.instance.email}',
-                    style: const TextStyle(color: AppColors.grey),
+                    style: TextStyle(color: AppColors.grey),
                   ),
                   if (error != null) FormMessage(error),
                   const SizedBox(height: 20),

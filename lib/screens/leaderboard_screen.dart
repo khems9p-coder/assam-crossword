@@ -82,7 +82,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             _filter == null
                 ? 'Ranked by total points'
                 : 'Ranked by puzzles completed on ${_filter!.label}',
-            style: const TextStyle(fontSize: 13, color: AppColors.grey),
+            style: TextStyle(fontSize: 13, color: AppColors.grey),
           ),
           const SizedBox(height: 12),
           if (future == null)
@@ -142,7 +142,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       margin: EdgeInsets.zero,
       child: ListTile(
         leading: const CircleAvatar(
-          backgroundColor: AppColors.forestGreen,
+          backgroundColor: AppColors.brand,
           child: Icon(Icons.person_rounded, color: Colors.white),
         ),
         title: const Text(
@@ -190,7 +190,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         subtitle: Text('Level ${entry.level} · ${entry.puzzles} puzzles'),
         trailing: Text(
           _filter == null ? '$value pts' : '$value',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppColors.forestGreen,
@@ -224,7 +224,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               'Top players for $filterLabel will appear here. Log in and '
                   'finish puzzles to get on the board.',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.grey),
+          style: TextStyle(color: AppColors.grey),
         ),
       ],
     );

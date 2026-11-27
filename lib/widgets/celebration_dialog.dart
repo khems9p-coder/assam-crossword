@@ -89,7 +89,7 @@ class _CelebrationDialogState extends State<CelebrationDialog>
                     size: 56,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Puzzle complete!',
                     style: TextStyle(
                       fontSize: 22,
@@ -135,7 +135,7 @@ class _CelebrationDialogState extends State<CelebrationDialog>
                   const SizedBox(height: 4),
                   Text(
                     '+${result.points} points',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.forestGreen,
@@ -253,7 +253,7 @@ class _Piece {
 
   static const List<Color> _colors = [
     AppColors.gold,
-    AppColors.forestGreen,
+    AppColors.brand,
     Colors.redAccent,
     Colors.lightBlue,
     Colors.orange,

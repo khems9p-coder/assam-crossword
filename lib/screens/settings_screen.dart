@@ -108,6 +108,46 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+              const SectionTitle('Appearance'),
+              Card(
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(
+                            value: 'light',
+                            icon: Icon(Icons.light_mode_rounded),
+                            label: Text('Light'),
+                          ),
+                          ButtonSegment(
+                            value: 'dark',
+                            icon: Icon(Icons.dark_mode_rounded),
+                            label: Text('Dark'),
+                          ),
+                          ButtonSegment(
+                            value: 'system',
+                            icon: Icon(Icons.settings_suggest_rounded),
+                            label: Text('Auto'),
+                          ),
+                        ],
+                        selected: {state.themeChoice},
+                        onSelectionChanged: (Set<String> choice) =>
+                            state.setThemeChoice(choice.first),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Auto follows your device setting.',
+                        style: TextStyle(fontSize: 13, color: AppColors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
               const SectionTitle('Text size'),
               Card(
                 margin: EdgeInsets.zero,
@@ -131,7 +171,7 @@ class SettingsScreen extends StatelessWidget {
                         label: _sizeNames[sizeIndex],
                         onChanged: (v) => state.setTextScale(_sizes[v.round()]),
                       ),
-                      const Text(
+                      Text(
                         'This is how text will look in the app.',
                         style: TextStyle(color: AppColors.grey),
                       ),
@@ -191,7 +231,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Your settings are saved on this device. Background music '
                 'is coming in a later update.',
                 textAlign: TextAlign.center,

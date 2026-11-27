@@ -48,6 +48,10 @@ class AppState extends ChangeNotifier {
       _soundOn = _readBool(settings['soundOn'], _soundOn);
       _musicOn = _readBool(settings['musicOn'], _musicOn);
       _vibrationOn = _readBool(settings['vibrationOn'], _vibrationOn);
+      final Object? theme = settings['theme'];
+      if (theme == 'light' || theme == 'dark' || theme == 'system') {
+        _themeChoice = theme as String;
+      }
       final Object? scale = settings['textScale'];
       if (scale is num) {
         _textScale = scale.toDouble();
@@ -119,6 +123,17 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 'system', 'light' or 'dark'.
+  String _themeChoice = 'system';
+
+  String get themeChoice => _themeChoice;
+
+  void setThemeChoice(String value) {
+    _themeChoice = value;
+    _saveSettings();
+    notifyListeners();
+  }
+
   void setTextScale(double value) {
     _textScale = value;
     _saveSettings();
@@ -135,6 +150,7 @@ class AppState extends ChangeNotifier {
     _musicOn = false;
     _vibrationOn = true;
     _textScale = 1.0;
+    _themeChoice = 'system';
     notifyListeners();
   }
 
@@ -157,6 +173,7 @@ class AppState extends ChangeNotifier {
       'soundOn': _soundOn,
       'musicOn': _musicOn,
       'vibrationOn': _vibrationOn,
+      'theme': _themeChoice,
       'textScale': _textScale,
     }));
   }

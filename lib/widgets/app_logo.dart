@@ -10,7 +10,7 @@ class AppLogo extends StatelessWidget {
   const AppLogo({
     super.key,
     this.size = 120,
-    this.backgroundColor = AppColors.forestGreen,
+    this.backgroundColor = AppColors.brand,
     this.iconColor = AppColors.gold,
   });
 

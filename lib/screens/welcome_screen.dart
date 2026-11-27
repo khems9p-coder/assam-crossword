@@ -22,7 +22,7 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   const AppLogo(size: 120),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     AppConstants.appName,
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -32,7 +32,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     AppConstants.tagline,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: AppColors.grey),
@@ -53,7 +53,7 @@ class WelcomeScreen extends StatelessWidget {
                     child: const Text('Login / Register'),
                   ),
                   const SizedBox(height: 48),
-                  const Text(
+                  Text(
                     'Developed by ${AppConstants.developer}',
                     style: TextStyle(fontSize: 13, color: AppColors.grey),
                   ),

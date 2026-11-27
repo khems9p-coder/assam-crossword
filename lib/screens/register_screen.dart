@@ -89,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  Text(
                     'Create a free account to keep your progress online.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.grey),

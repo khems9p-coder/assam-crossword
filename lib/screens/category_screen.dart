@@ -23,7 +23,7 @@ class CategoryScreen extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              const Text(
+              Text(
                 'Choose a subject area, then pick a topic.',
                 style: TextStyle(fontSize: 15, color: AppColors.grey),
               ),

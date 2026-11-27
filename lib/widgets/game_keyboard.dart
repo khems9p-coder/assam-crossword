@@ -83,7 +83,7 @@ class _Key extends StatelessWidget {
     final Widget key = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Material(
-        color: Colors.white,
+        color: AppColors.surface,
         elevation: 1,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(

@@ -49,8 +49,8 @@ class DailyChallengeScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [
-                      AppColors.forestGreen,
-                      AppColors.forestGreenLight,
+                      AppColors.brand,
+                      AppColors.brandLight,
                     ],
                   ),
                   borderRadius: BorderRadius.circular(20),
@@ -156,7 +156,7 @@ class DailyChallengeScreen extends StatelessWidget {
                     : 'The streak counts days in a row with the Daily '
                         'Challenge finished.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, color: AppColors.grey),
+                style: TextStyle(fontSize: 13, color: AppColors.grey),
               ),
             ],
           ),

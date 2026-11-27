@@ -439,7 +439,7 @@ class _GameScreenState extends State<GameScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.category_rounded,
                   size: 64,
                   color: AppColors.forestGreen,

@@ -74,13 +74,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.lock_reset_rounded,
                     size: 64,
                     color: AppColors.forestGreen,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Enter the email you registered with. We will send you a '
                     'link to choose a new password.',
                     textAlign: TextAlign.center,

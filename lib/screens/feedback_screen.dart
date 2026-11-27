@@ -83,7 +83,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  Text(
                     'Found a mistake or have an idea? Tell us below.',
                     style: TextStyle(fontSize: 15, color: AppColors.grey),
                   ),
@@ -169,7 +169,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     label: const Text('Send Feedback'),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Tapping Send opens your email app with your message '
                     'ready to go to ${AppConstants.contactEmail}.',
                     textAlign: TextAlign.center,

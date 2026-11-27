@@ -109,7 +109,7 @@ class ProgressScreen extends StatelessWidget {
                           title: Text(level.label),
                           trailing: Text(
                             '${stats.completedByDifficulty[level] ?? 0}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.forestGreen,
@@ -121,7 +121,7 @@ class ProgressScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 if (stats.puzzlesCompleted == 0)
-                  const Text(
+                  Text(
                     'Complete your first puzzle to start filling these '
                     'numbers in.',
                     textAlign: TextAlign.center,

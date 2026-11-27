@@ -17,7 +17,7 @@ class MenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       elevation: 1,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(

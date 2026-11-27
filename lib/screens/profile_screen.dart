@@ -76,7 +76,7 @@ class ProfileScreen extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               radius: 44,
-                              backgroundColor: AppColors.forestGreen,
+                              backgroundColor: AppColors.brand,
                               child: signedIn
                                   ? Text(
                                       name.isNotEmpty
@@ -108,13 +108,13 @@ class ProfileScreen extends StatelessWidget {
                               signedIn
                                   ? auth.email
                                   : 'Playing without an account',
-                              style: const TextStyle(color: AppColors.grey),
+                              style: TextStyle(color: AppColors.grey),
                             ),
                             if (signedIn && since != null) ...[
                               const SizedBox(height: 4),
                               Text(
                                 'Member since ${Helpers.formatLongDate(since)}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
                                   color: AppColors.grey,
                                 ),
@@ -134,7 +134,7 @@ class ProfileScreen extends StatelessWidget {
                                 child: const Text('Login / Register'),
                               ),
                               const SizedBox(height: 8),
-                              const Text(
+                              Text(
                                 'An account keeps your progress safe if you '
                                 'change or reset your phone.',
                                 textAlign: TextAlign.center,

@@ -49,7 +49,7 @@ class AboutScreen extends StatelessWidget {
               children: [
                 const Center(child: AppLogo(size: 96)),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   AppConstants.appName,
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -58,7 +58,7 @@ class AboutScreen extends StatelessWidget {
                     color: AppColors.forestGreen,
                   ),
                 ),
-                const Text(
+                Text(
                   'Version ${AppConstants.appVersion}',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: AppColors.grey),
@@ -93,7 +93,7 @@ class AboutScreen extends StatelessWidget {
                   margin: EdgeInsets.zero,
                   child: Column(
                     children: [
-                      const ListTile(
+                      ListTile(
                         leading: Icon(
                           Icons.business_rounded,
                           color: AppColors.forestGreen,
@@ -101,7 +101,7 @@ class AboutScreen extends StatelessWidget {
                         title: Text(AppConstants.developer),
                       ),
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.email_rounded,
                           color: AppColors.forestGreen,
                         ),
@@ -153,7 +153,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Developed by ${AppConstants.developer}',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 12, color: AppColors.grey),

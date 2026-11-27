@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const Center(child: AppLogo(size: 80)),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Welcome back!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'Log in to keep your progress with your account.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.grey),

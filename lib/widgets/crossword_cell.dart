@@ -37,15 +37,17 @@ class CrosswordCell extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: AppColors.forestGreen.withValues(alpha: 0.9),
-          border: Border.all(color: AppColors.forestGreen, width: 0.5),
+          color: AppColors.brand.withValues(alpha: 0.9),
+          border: Border.all(color: AppColors.brand, width: 0.5),
         ),
       );
     }
 
-    Color background = Colors.white;
+    Color background = AppColors.surface;
     if (isGiven) {
-      background = Colors.grey.shade300;
+      background = AppColors.isDark
+          ? Colors.grey.shade700
+          : Colors.grey.shade300;
     }
     if (isSolved) {
       background = Colors.green.withValues(alpha: 0.18);
@@ -60,7 +62,7 @@ class CrosswordCell extends StatelessWidget {
       background = AppColors.gold.withValues(alpha: 0.75);
     }
 
-    Color textColor = Colors.black87;
+    Color textColor = AppColors.ink;
     if (isRevealed) {
       textColor = Colors.blueGrey;
     }

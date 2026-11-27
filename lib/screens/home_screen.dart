@@ -105,7 +105,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   const _CurrentGameCard(),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'Menu',
                     style: TextStyle(
                       fontSize: 20,
@@ -142,7 +142,7 @@ class HomeScreen extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'Developed by ${AppConstants.developer}',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12, color: AppColors.grey),
@@ -171,7 +171,7 @@ class _CurrentGameCard extends StatelessWidget {
         return Card(
           margin: EdgeInsets.zero,
           child: ListTile(
-            leading: const Icon(
+            leading: Icon(
               Icons.tune_rounded,
               color: AppColors.forestGreen,
             ),
@@ -203,7 +203,7 @@ class _WelcomeHeader extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [AppColors.forestGreen, AppColors.forestGreenLight],
+              colors: [AppColors.brand, AppColors.brandLight],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -211,7 +211,7 @@ class _WelcomeHeader extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const AppLogo(
+              AppLogo(
                 size: 56,
                 backgroundColor: AppColors.cream,
                 iconColor: AppColors.forestGreen,
@@ -279,7 +279,7 @@ class _StatCard extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.forestGreen,
@@ -292,7 +292,7 @@ class _StatCard extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: AppColors.grey),
+              style: TextStyle(fontSize: 12, color: AppColors.grey),
             ),
           ],
         ),

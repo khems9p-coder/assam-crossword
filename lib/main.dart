@@ -67,9 +67,29 @@ class AssamCrosswordApp extends StatelessWidget {
           title: AppConstants.appName,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: switch (state.themeChoice) {
+            'light' => ThemeMode.light,
+            'dark' => ThemeMode.dark,
+            _ => ThemeMode.system,
+          },
           home: const SplashScreen(),
           routes: AppRoutes.routes,
           builder: (context, child) {
+            // Tell AppColors which mode is showing. When it changes,
+            // repaint every screen so all colours switch together.
+            final bool dark = Theme.of(context).brightness == Brightness.dark;
+            if (dark != AppColors.isDark) {
+              AppColors.isDark = dark;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                void rebuild(Element element) {
+                  element.markNeedsBuild();
+                  element.visitChildren(rebuild);
+                }
+
+                WidgetsBinding.instance.rootElement?.visitChildren(rebuild);
+              });
+            }
             final MediaQueryData media = MediaQuery.of(context);
             return MediaQuery(
               data: media.copyWith(

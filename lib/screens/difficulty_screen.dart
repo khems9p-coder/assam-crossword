@@ -22,7 +22,7 @@ class DifficultyScreen extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              const Text(
+              Text(
                 'Pick how challenging your crossword should be.',
                 style: TextStyle(fontSize: 15, color: AppColors.grey),
               ),
@@ -67,7 +67,7 @@ class _DifficultyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -99,7 +99,7 @@ class _DifficultyCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       level.description,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         color: AppColors.grey,
                       ),
@@ -107,7 +107,7 @@ class _DifficultyCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '${level.gridSize} × ${level.gridSize} grid',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.forestGreen,

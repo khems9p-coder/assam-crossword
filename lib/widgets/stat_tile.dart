@@ -29,7 +29,7 @@ class StatTile extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppColors.forestGreen,
@@ -42,7 +42,7 @@ class StatTile extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: AppColors.grey),
+              style: TextStyle(fontSize: 12, color: AppColors.grey),
             ),
           ],
         ),
@@ -87,7 +87,7 @@ class SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: AppColors.forestGreen,

@@ -15,7 +15,7 @@ class ActiveClueBar extends StatelessWidget {
     final CrosswordWord? word = engine.activeWord;
 
     return Material(
-      color: AppColors.forestGreen,
+      color: AppColors.brand,
       child: Row(
         children: [
           IconButton(
@@ -82,7 +82,7 @@ class ClueList extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
           child: Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppColors.forestGreen,

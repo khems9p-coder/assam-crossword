@@ -77,7 +77,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  Text(
                     'For your security, enter your current password first.',
                     style: TextStyle(color: AppColors.grey),
                   ),

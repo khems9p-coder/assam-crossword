@@ -30,7 +30,7 @@ class AchievementScreen extends StatelessWidget {
                 children: [
                   Text(
                     '$unlockedCount of $total unlocked',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.forestGreen,
@@ -47,7 +47,7 @@ class AchievementScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Complete puzzles to unlock badges.',
                     style: TextStyle(fontSize: 13, color: AppColors.grey),
                   ),

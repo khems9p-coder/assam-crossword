@@ -35,7 +35,7 @@ class ComingSoonScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'This screen will be built soon.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, color: AppColors.grey),
