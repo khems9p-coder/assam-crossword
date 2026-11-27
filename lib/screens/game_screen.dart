@@ -9,8 +9,11 @@ import '../models/crossword.dart';
 import '../models/difficulty.dart';
 import '../services/app_state.dart';
 import '../services/puzzle_service.dart';
+import '../services/score_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_routes.dart';
+import '../utils/helpers.dart';
+import '../widgets/celebration_dialog.dart';
 import '../widgets/clue_panel.dart';
 import '../widgets/crossword_grid.dart';
 import '../widgets/game_keyboard.dart';
@@ -26,8 +29,6 @@ enum _Tool {
   changeDifficulty,
 }
 
-enum _AfterFinish { dashboard, replay, next }
-
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
 
@@ -35,7 +36,8 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+class _GameScreenState extends State<GameScreen>
+    with WidgetsBindingObserver {
   late final String? _topicId;
   late final Difficulty _difficulty;
   int _number = 1;
@@ -46,12 +48,16 @@ class _GameScreenState extends State<GameScreen> {
   ValidationResult? _validation;
   CrosswordEngine? _engine;
   bool _celebrated = false;
+  Timer? _clock;
+  int _seconds = 0;
+  bool _inBackground = false;
 
   @override
   void initState() {
     super.initState();
     _topicId = AppState.instance.topicId;
     _difficulty = AppState.instance.difficulty;
+    WidgetsBinding.instance.addObserver(this);
     _prepare();
   }
 
@@ -90,10 +96,33 @@ class _GameScreenState extends State<GameScreen> {
       puzzle,
       givenShare: CrosswordEngine.givenShareFor(_difficulty),
     )..addListener(_onEngineChanged);
+    _startClock();
+  }
+
+  // ---------- Timer ----------
+
+  /// Counts seconds while the puzzle is being played. It stops when the
+  /// puzzle is finished and pauses while the app is in the background.
+  void _startClock() {
+    _clock?.cancel();
+    _clock = Timer.periodic(const Duration(seconds: 1), (_) {
+      final CrosswordEngine? engine = _engine;
+      if (!mounted || _inBackground || engine == null || engine.isComplete) {
+        return;
+      }
+      setState(() => _seconds++);
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _inBackground = state != AppLifecycleState.resumed;
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _clock?.cancel();
     _engine?.removeListener(_onEngineChanged);
     _engine?.dispose();
     super.dispose();
@@ -110,15 +139,7 @@ class _GameScreenState extends State<GameScreen> {
     }
     if (!_celebrated) {
       _celebrated = true;
-      final String? topicId = _topicId;
-      if (topicId != null) {
-        unawaited(PuzzleService.markCompleted(topicId, _difficulty, _number));
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _showComplete();
-        }
-      });
+      unawaited(_finish(engine));
     }
   }
 
@@ -133,59 +154,46 @@ class _GameScreenState extends State<GameScreen> {
       );
   }
 
-  Future<void> _showComplete() async {
-    final CrosswordEngine? engine = _engine;
+  /// Saves the result, then shows the celebration.
+  Future<void> _finish(CrosswordEngine engine) async {
+    final String? topicId = _topicId;
     final CrosswordPuzzle? puzzle = _puzzle;
-    if (engine == null || puzzle == null) {
+    if (topicId == null || puzzle == null) {
       return;
     }
-    final _AfterFinish? choice = await showDialog<_AfterFinish>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        icon: const Icon(
-          Icons.emoji_events_rounded,
-          color: AppColors.gold,
-          size: 48,
-        ),
-        title: const Text('Puzzle complete!'),
-        content: Text(
-          'Well done! You solved "${puzzle.title}".\n\n'
-          'Mistakes found by checks: ${engine.incorrectAttempts}\n'
-          'Letters revealed: ${engine.lettersRevealed}\n'
-          'Words revealed: ${engine.wordsRevealed}\n\n'
-          'Timer, points and achievements are added in the next phases.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(_AfterFinish.dashboard),
-            child: const Text('Dashboard'),
-          ),
-          TextButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(_AfterFinish.replay),
-            child: const Text('Replay'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(_AfterFinish.next),
-            child: const Text('Next Puzzle'),
-          ),
-        ],
-      ),
+    final int seconds = _seconds;
+    await PuzzleService.markCompleted(topicId, _difficulty, _number);
+    final GameResult result = await ScoreService.record(
+      topicId: topicId,
+      difficulty: _difficulty,
+      engine: engine,
+      seconds: seconds,
+    );
+    if (!mounted) {
+      return;
+    }
+    final FinishChoice? choice = await CelebrationDialog.show(
+      context,
+      title: puzzle.title,
+      result: result,
     );
     if (!mounted) {
       return;
     }
     switch (choice) {
-      case _AfterFinish.replay:
-        engine.restart();
-      case _AfterFinish.next:
+      case FinishChoice.replay:
+        _restart(engine);
+      case FinishChoice.next:
         Navigator.of(context).pushReplacementNamed(AppRoutes.game);
-      case _AfterFinish.dashboard:
+      case FinishChoice.dashboard:
       case null:
         Navigator.of(context).pop();
     }
+  }
+
+  void _restart(CrosswordEngine engine) {
+    engine.restart();
+    setState(() => _seconds = 0);
   }
 
   Future<void> _confirmRestart(CrosswordEngine engine) async {
@@ -207,7 +215,7 @@ class _GameScreenState extends State<GameScreen> {
       ),
     );
     if (yes == true) {
-      engine.restart();
+      _restart(engine);
     }
   }
 
@@ -277,7 +285,8 @@ class _GameScreenState extends State<GameScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    '${_difficulty.label} · ${puzzle.words.length} words',
+                    '${_difficulty.label} · ${puzzle.words.length} words'
+                    ' · ⏱ ${Helpers.formatDuration(_seconds)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 12, color: Colors.white70),

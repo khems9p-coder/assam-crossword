@@ -13,8 +13,15 @@ class LocalStore {
   static const String keySelection = 'selection_v1';
   static const String keyStats = 'stats_v1';
   static const String keyPuzzles = 'puzzles_v1';
+  static const String keyBestTimes = 'best_times_v1';
 
-  static const List<String> _allKeys = [keySettings, keySelection, keyStats, keyPuzzles];
+  static const List<String> _allKeys = [
+    keySettings,
+    keySelection,
+    keyStats,
+    keyPuzzles,
+    keyBestTimes,
+  ];
 
   SharedPreferences? _prefs;
 
