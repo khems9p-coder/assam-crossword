@@ -37,6 +37,7 @@ class QuestionBank {
     'assets/data/india_bank_3.json',
     'assets/data/india_bank_4.json',
     'assets/data/english_bank.json',
+    'assets/data/english_bank_2.json',
   ];
 
   static final RegExp _lettersOnly = RegExp(r'^[A-Z]+$');
