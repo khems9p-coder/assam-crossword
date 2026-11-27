@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../services/contact_service.dart';
+import '../services/feedback_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/constants.dart';
 
@@ -41,32 +42,69 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     }
     setState(() => _sending = true);
 
-    final String body = 'Name: ${_name.text.trim()}\n'
-        'Email: ${_email.text.trim()}\n'
-        'Category: $_category\n\n'
-        '${_message.text.trim()}\n\n'
-        'Sent from ${AppConstants.appName} ${AppConstants.appVersion}';
-
-    final bool opened = await ContactService.openEmail(
-      subject: '${AppConstants.appName} feedback: $_category',
-      body: body,
+    final FeedbackOutcome outcome = await FeedbackService.instance.submit(
+      name: _name.text,
+      email: _email.text,
+      category: _category,
+      message: _message.text,
     );
 
     if (!mounted) {
       return;
     }
     setState(() => _sending = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          opened
-              ? 'Your email app has opened. Tap Send there to deliver '
-                  'your feedback.'
-              : "Couldn't open an email app. Please write to "
-                  '${AppConstants.contactEmail}.',
+    _message.clear();
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: Icon(
+          outcome == FeedbackOutcome.sent
+              ? Icons.check_circle_rounded
+              : Icons.schedule_send_rounded,
+          color: AppColors.forestGreen,
+          size: 48,
         ),
+        title: Text(
+          outcome == FeedbackOutcome.sent ? 'Thank you!' : 'Saved',
+        ),
+        content: Text(
+          outcome == FeedbackOutcome.sent
+              ? 'Your feedback has been sent to ${AppConstants.developer}.'
+              : "You're offline right now. Your feedback is saved on this "
+                  'device and will be sent automatically when you are back '
+                  'online.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
+  }
+
+  /// The old way: write the same message in the email app instead.
+  Future<void> _sendByEmail() async {
+    final String body = 'Name: ${_name.text.trim()}\n'
+        'Email: ${_email.text.trim()}\n'
+        'Category: $_category\n\n'
+        '${_message.text.trim()}\n\n'
+        'Sent from ${AppConstants.appName} ${AppConstants.appVersion}';
+    final bool opened = await ContactService.openEmail(
+      subject: '${AppConstants.appName} feedback: $_category',
+      body: body,
+    );
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Couldn't open an email app. Please write to "
+            '${AppConstants.contactEmail}.',
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -150,6 +188,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     controller: _message,
                     minLines: 5,
                     maxLines: 10,
+                    maxLength: 2000,
                     decoration: const InputDecoration(
                       labelText: 'Message',
                       alignLabelWithHint: true,
@@ -168,10 +207,16 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     icon: const Icon(Icons.send_rounded),
                     label: const Text('Send Feedback'),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: _sendByEmail,
+                    icon: const Icon(Icons.email_outlined),
+                    label: const Text('Or send it by email instead'),
+                  ),
+                  const SizedBox(height: 4),
                   Text(
-                    'Tapping Send opens your email app with your message '
-                    'ready to go to ${AppConstants.contactEmail}.',
+                    'Feedback goes straight to ${AppConstants.developer}. '
+                    'If you are offline, it is saved and sent later.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12, color: AppColors.grey),
                   ),

@@ -3,6 +3,8 @@ rules_version = '2';
 // Security rules for Assam Crossword.
 // users/{uid}:       a player's full progress. Only that player can read or
 //                    change it.
+// feedback/{id}:     messages from the Feedback screen. Anyone can send one;
+//                    nobody can read them from the app (only in the console).
 // leaderboard/{uid}: name and scores. Everyone can read; only the player
 //                    can write their own row, and only with sensible values.
 service cloud.firestore {
@@ -40,6 +42,29 @@ service cloud.firestore {
         && isCount(request.resource.data.easy)
         && isCount(request.resource.data.medium)
         && isCount(request.resource.data.hard);
+    }
+
+    match /feedback/{id} {
+      allow create: if request.resource.data.keys().hasOnly(
+             ['name', 'email', 'category', 'message', 'appVersion',
+              'platform', 'uid', 'createdAt', 'receivedAt'])
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 200
+        && request.resource.data.category is string
+        && request.resource.data.category.size() <= 50
+        && (request.resource.data.uid == null
+            || (request.auth != null
+                && request.resource.data.uid == request.auth.uid));
+      // A re-send of a message that already arrived may only touch the
+      // arrival time, so it can never change what was written.
+      allow update: if request.resource.data.diff(resource.data)
+        .affectedKeys().hasOnly(['receivedAt']);
+      allow read, delete: if false;
     }
 
     // Everything else is closed.

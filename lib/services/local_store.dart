@@ -15,6 +15,9 @@ class LocalStore {
   static const String keyPuzzles = 'puzzles_v1';
   static const String keyBestTimes = 'best_times_v1';
   static const String keyDaily = 'daily_v1';
+  // Unsent feedback. Not removed by 'Clear local data', so nothing
+  // the player wrote is lost before it is delivered.
+  static const String keyFeedback = 'feedback_v1';
 
   static const List<String> _allKeys = [
     keySettings,
