@@ -1,15 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
 
-// The upload key for the Play Store. Its details live in android/key.properties,
-// which is never committed. Without that file, release builds use the debug key
-// (fine for testing on your own device, not for the Play Store).
-val keystoreProperties = Properties()
-val keystorePropertiesFile = rootProject.file("key.properties")
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-}
-
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -17,6 +8,15 @@ plugins {
     // END: FlutterFire Configuration
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// The upload key for the Play Store. Its details live in android/key.properties,
+// which is never committed. Without that file, release builds use the debug key
+// (fine for testing on your own device, not for the Play Store).
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
