@@ -10,6 +10,7 @@ import '../models/difficulty.dart';
 import '../services/app_state.dart';
 import '../services/puzzle_service.dart';
 import '../services/score_service.dart';
+import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_routes.dart';
 import '../utils/helpers.dart';
@@ -51,6 +52,9 @@ class _GameScreenState extends State<GameScreen>
   Timer? _clock;
   int _seconds = 0;
   bool _inBackground = false;
+  int _lastSolved = 0;
+  int _combo = 0;
+  DateTime? _lastSolveTime;
 
   @override
   void initState() {
@@ -95,7 +99,9 @@ class _GameScreenState extends State<GameScreen>
     _engine = CrosswordEngine(
       puzzle,
       givenShare: CrosswordEngine.givenShareFor(_difficulty),
-    )..addListener(_onEngineChanged);
+    )
+      ..onEvent = _onGameEvent
+      ..addListener(_onEngineChanged);
     _startClock();
   }
 
@@ -133,6 +139,11 @@ class _GameScreenState extends State<GameScreen>
     if (engine == null) {
       return;
     }
+    final int solved = engine.solvedWordCount;
+    if (solved > _lastSolved && !engine.isComplete) {
+      _playSolvedDing();
+    }
+    _lastSolved = solved;
     if (!engine.isComplete) {
       _celebrated = false;
       return;
@@ -172,6 +183,8 @@ class _GameScreenState extends State<GameScreen>
     if (!mounted) {
       return;
     }
+    SoundService.instance.play(Sfx.complete);
+    SoundService.instance.buzz(Buzz.celebrate);
     final FinishChoice? choice = await CelebrationDialog.show(
       context,
       title: puzzle.title,
@@ -192,6 +205,9 @@ class _GameScreenState extends State<GameScreen>
   }
 
   void _restart(CrosswordEngine engine) {
+    SoundService.instance.play(Sfx.shuffle);
+    _combo = 0;
+    _lastSolveTime = null;
     engine.restart();
     setState(() => _seconds = 0);
   }
@@ -227,19 +243,24 @@ class _GameScreenState extends State<GameScreen>
     switch (tool) {
       case _Tool.checkWord:
         final int wrong = engine.checkWord();
+        _checkFeedback(wrong);
         _toast(wrong == 0
             ? 'No mistakes in this word so far.'
             : '$wrong wrong letter(s) marked in red.');
       case _Tool.checkPuzzle:
         final int wrong = engine.checkPuzzle();
+        _checkFeedback(wrong);
         _toast(wrong == 0
             ? 'No mistakes in the puzzle so far.'
             : '$wrong wrong letter(s) marked in red.');
       case _Tool.revealLetter:
+        SoundService.instance.play(Sfx.sparkle);
         engine.revealLetter();
       case _Tool.revealWord:
+        SoundService.instance.play(Sfx.sparkle);
         engine.revealWord();
       case _Tool.clearWord:
+        SoundService.instance.play(Sfx.whoosh);
         engine.clearWord();
       case _Tool.restart:
         _confirmRestart(engine);
@@ -248,6 +269,46 @@ class _GameScreenState extends State<GameScreen>
       case _Tool.changeDifficulty:
         Navigator.of(context).pushNamed(AppRoutes.difficulty);
     }
+  }
+
+  void _checkFeedback(int wrong) {
+    if (wrong > 0) {
+      SoundService.instance.play(Sfx.buzzer);
+      SoundService.instance.buzz(Buzz.strong);
+    } else {
+      SoundService.instance.play(Sfx.select);
+    }
+  }
+
+  /// Sounds for taps, typing and moving around the grid.
+  void _onGameEvent(GameEvent event) {
+    switch (event) {
+      case GameEvent.selected:
+      case GameEvent.erased:
+        SoundService.instance.play(Sfx.select);
+      case GameEvent.moved:
+        SoundService.instance.play(Sfx.whoosh);
+      case GameEvent.placed:
+        SoundService.instance.play(Sfx.snap);
+      case GameEvent.blocked:
+        SoundService.instance.play(Sfx.thud);
+        SoundService.instance.buzz(Buzz.light);
+    }
+  }
+
+  /// Words solved within 20 seconds of each other make a combo, and each
+  /// one rings a step higher.
+  void _playSolvedDing() {
+    final DateTime now = DateTime.now();
+    final DateTime? last = _lastSolveTime;
+    if (last != null && now.difference(last) < const Duration(seconds: 20)) {
+      _combo++;
+    } else {
+      _combo = 1;
+    }
+    _lastSolveTime = now;
+    SoundService.instance.play(Sfx.ding(_combo));
+    SoundService.instance.buzz(Buzz.light);
   }
 
   void _showClueSheet(CrosswordEngine engine) {

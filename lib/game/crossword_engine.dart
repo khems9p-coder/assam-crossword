@@ -5,6 +5,15 @@ import 'package:flutter/foundation.dart';
 import '../models/crossword.dart';
 import '../models/difficulty.dart';
 
+/// Things that happen during play, reported so the game can play sounds.
+enum GameEvent {
+  selected, // a square was tapped
+  moved, // jumped to another clue
+  placed, // a letter went into a square
+  erased, // a letter was deleted
+  blocked, // the move was not allowed (locked squares)
+}
+
 /// The rules of play for one crossword.
 /// The screen only shows what this engine says and passes taps and key
 /// presses to it.
@@ -81,6 +90,11 @@ class CrosswordEngine extends ChangeNotifier {
   int _checksUsed = 0;
 
   static final RegExp _oneLetter = RegExp(r'^[A-Z]$');
+
+  /// Called for every [GameEvent] (used for sound effects).
+  void Function(GameEvent event)? onEvent;
+
+  void _emit(GameEvent event) => onEvent?.call(event);
 
   // ---------- Reading the board ----------
 
@@ -208,6 +222,7 @@ class CrosswordEngine extends ChangeNotifier {
         _direction = _direction.other;
       }
     }
+    _emit(GameEvent.selected);
     notifyListeners();
   }
 
@@ -215,12 +230,18 @@ class CrosswordEngine extends ChangeNotifier {
     final CellPos? cell = _selected;
     if (cell != null && wordAt(cell, _direction.other) != null) {
       _direction = _direction.other;
+      _emit(GameEvent.selected);
       notifyListeners();
     }
   }
 
   /// Jump to a word (for example, when its clue is tapped).
   void selectWord(CrosswordWord word) {
+    _select(word);
+    _emit(GameEvent.moved);
+  }
+
+  void _select(CrosswordWord word) {
     _direction = word.direction;
     _selected = word.cellAt(0);
     for (final CellPos cell in word.cells) {
@@ -253,7 +274,7 @@ class CrosswordEngine extends ChangeNotifier {
       final CrosswordWord word =
           _orderedWords[(start + step) % _orderedWords.length];
       if (!_solved.contains(word)) {
-        selectWord(word);
+        _select(word);
         return;
       }
     }
@@ -278,7 +299,8 @@ class CrosswordEngine extends ChangeNotifier {
       index++;
     }
     if (index >= word.length) {
-      return; // Every square left in this word is locked.
+      _emit(GameEvent.blocked); // Every square left in this word is locked.
+      return;
     }
     final CellPos target = word.cellAt(index);
     _entries[target.row][target.col] = upper;
@@ -293,6 +315,7 @@ class CrosswordEngine extends ChangeNotifier {
       _selected = word.cellAt(next);
     }
 
+    _emit(GameEvent.placed);
     final List<CrosswordWord> newlySolved = _refreshSolved();
     if (newlySolved.contains(word) && !isComplete) {
       _goToNextUnsolved(word);
@@ -310,6 +333,7 @@ class CrosswordEngine extends ChangeNotifier {
     }
     if (_entries[cell.row][cell.col].isNotEmpty && !_isLocked(cell)) {
       _clearCell(cell);
+      _emit(GameEvent.erased);
     } else {
       int index = word.indexOf(cell) - 1;
       while (index >= 0 && _isLocked(word.cellAt(index))) {
@@ -319,6 +343,9 @@ class CrosswordEngine extends ChangeNotifier {
         final CellPos previous = word.cellAt(index);
         _selected = previous;
         _clearCell(previous);
+        _emit(GameEvent.erased);
+      } else {
+        _emit(GameEvent.blocked);
       }
     }
     notifyListeners();

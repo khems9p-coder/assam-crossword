@@ -10,6 +10,7 @@ import 'services/app_state.dart';
 import 'services/auth_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/local_store.dart';
+import 'services/sound_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/app_routes.dart';
 import 'utils/constants.dart';
@@ -24,6 +25,9 @@ Future<void> main() async {
   } catch (error) {
     debugPrint('Local storage not available: $error');
   }
+
+  // Load the sound effects (the game stays quiet if this fails).
+  unawaited(SoundService.instance.init());
 
   // Load the built-in question bank (works offline).
   await QuestionBank.instance.load();

@@ -192,9 +192,8 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Your settings are saved on this device. Sounds, music and '
-                'vibration are added in a later phase and will follow these '
-                'choices.',
+                'Your settings are saved on this device. Background music '
+                'is coming in a later update.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: AppColors.grey),
               ),

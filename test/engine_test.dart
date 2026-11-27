@@ -191,6 +191,18 @@ void main() {
       expect(countGivens(), givens);
     });
 
+    test('events are reported for sound effects', () {
+      final List<GameEvent> events = [];
+      game.onEvent = events.add;
+      game.enterLetter('T');
+      game.enterLetter('E');
+      game.enterLetter('A');
+      expect(events, [GameEvent.placed, GameEvent.placed, GameEvent.placed]);
+      game.selectWord(word('TEA'));
+      game.enterLetter('X');
+      expect(events.sublist(3), [GameEvent.moved, GameEvent.blocked]);
+    });
+
     test('restart clears everything', () {
       game.enterLetter('T');
       game.revealLetter();
