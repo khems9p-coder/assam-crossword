@@ -14,16 +14,18 @@ void main() {
     await QuestionBank.instance.load();
   });
 
-  final SubjectArea assam =
-      CategoryData.areas.firstWhere((area) => area.id == 'assam');
+  final List<Topic> allTopics = [
+    for (final SubjectArea area in CategoryData.areas) ...area.topics,
+  ];
 
   test('the question bank loads without problems', () {
     expect(QuestionBank.instance.problems, isEmpty);
-    expect(QuestionBank.instance.totalEntries, greaterThanOrEqualTo(90));
+    expect(QuestionBank.instance.totalEntries, greaterThanOrEqualTo(500));
   });
 
-  test('every Assam topic has at least 12 questions', () {
-    for (final Topic topic in assam.topics) {
+  test('all 29 topics have at least 12 questions', () {
+    expect(allTopics.length, 29);
+    for (final Topic topic in allTopics) {
       expect(
         QuestionBank.instance.entriesFor(topic.id).length,
         greaterThanOrEqualTo(12),
@@ -32,10 +34,10 @@ void main() {
     }
   });
 
-  test('every Assam topic makes valid puzzles at every difficulty', () {
-    for (final Topic topic in assam.topics) {
+  test('every topic makes valid puzzles at every difficulty', () {
+    for (final Topic topic in allTopics) {
       for (final Difficulty level in Difficulty.values) {
-        for (int number = 1; number <= 3; number++) {
+        for (int number = 1; number <= 2; number++) {
           final CrosswordPuzzle? puzzle =
               PuzzleService.build(topic.id, level, number);
           final String name = '${topic.name} ${level.label} #$number';
@@ -52,9 +54,9 @@ void main() {
 
   test('the same puzzle number always gives the same puzzle', () {
     final CrosswordPuzzle a =
-        PuzzleService.build('assam_culture', Difficulty.medium, 2)!;
+        PuzzleService.build('eng_idioms', Difficulty.medium, 2)!;
     final CrosswordPuzzle b =
-        PuzzleService.build('assam_culture', Difficulty.medium, 2)!;
+        PuzzleService.build('eng_idioms', Difficulty.medium, 2)!;
     expect(
       a.words.map((w) => '${w.answer}${w.row}${w.col}').toList(),
       b.words.map((w) => '${w.answer}${w.row}${w.col}').toList(),

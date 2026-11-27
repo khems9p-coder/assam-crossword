@@ -80,8 +80,8 @@ class _GameScreenState extends State<GameScreen> {
         PuzzleService.build(topicId, _difficulty, _number);
     if (puzzle == null) {
       _needsTopic = true;
-      _message = 'Puzzles for this topic are coming soon. For now, try a '
-          'topic from Assam General Knowledge.';
+      _message = 'There are not enough questions for this topic yet. '
+          'Please choose another topic.';
       return;
     }
     _puzzle = puzzle;

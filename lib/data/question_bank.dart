@@ -29,7 +29,12 @@ class QuestionBank {
   static final QuestionBank instance = QuestionBank._();
 
   /// Add new question files here (and put the file in assets/data/).
-  static const List<String> files = ['assets/data/assam_bank.json'];
+  static const List<String> files = [
+    'assets/data/assam_bank.json',
+    'assets/data/india_bank_1.json',
+    'assets/data/india_bank_2.json',
+    'assets/data/english_bank.json',
+  ];
 
   static final RegExp _lettersOnly = RegExp(r'^[A-Z]+$');
 
