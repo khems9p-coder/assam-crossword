@@ -6,8 +6,12 @@ import '../models/difficulty.dart';
 import 'puzzle_validator.dart';
 
 /// Builds a crossword layout from a topic's questions.
-/// The same seed always gives the same puzzle. Every result is checked by
-/// [PuzzleValidator] before it is used.
+/// The same seed and puzzle number always give the same puzzle. Every
+/// result is checked by [PuzzleValidator] before it is used.
+///
+/// To avoid repeats, the questions are dealt like a deck of cards: each
+/// puzzle number starts further along the deck, so words from the last
+/// puzzle come last in the queue for the next one.
 class PuzzleGenerator {
   PuzzleGenerator._();
 
@@ -20,6 +24,8 @@ class PuzzleGenerator {
         Difficulty.hard => 12,
       };
 
+  /// [seed] is fixed for a topic and difficulty; [number] is the puzzle
+  /// number (1, 2, 3, ...).
   static CrosswordPuzzle? generate({
     required String id,
     required String title,
@@ -27,6 +33,7 @@ class PuzzleGenerator {
     required Difficulty difficulty,
     required List<BankEntry> entries,
     required int seed,
+    int number = 1,
   }) {
     final int size = difficulty.gridSize;
     final int maxWords = maxWordsFor(difficulty);
@@ -35,16 +42,18 @@ class PuzzleGenerator {
     if (pool.length < minWords) {
       return null;
     }
+    final List<BankEntry> deck = _deckFor(pool, difficulty, maxWords, seed);
+    final int start = ((number - 1) * maxWords) % deck.length;
+    final List<BankEntry> queue = [
+      ...deck.sublist(start),
+      ...deck.sublist(0, start),
+    ];
 
     CrosswordPuzzle? best;
     for (int attempt = 0; attempt < attempts; attempt++) {
-      final _Board board = _build(
-        pool,
-        difficulty,
-        size,
-        maxWords,
-        Random(seed * 1000 + attempt),
-      );
+      final int attemptSeed =
+          ((seed ^ (number * 7919)) & 0x7fffffff) * 31 + attempt;
+      final _Board board = _build(queue, size, maxWords, Random(attemptSeed));
       if (board.placed.length < minWords) {
         continue;
       }
@@ -67,31 +76,39 @@ class PuzzleGenerator {
     return best;
   }
 
-  static _Board _build(
+  /// The topic's questions in a fixed shuffled order. Easy leaves out the
+  /// hardest questions and Hard leaves out the easiest, when there are
+  /// enough questions to do so.
+  static List<BankEntry> _deckFor(
     List<BankEntry> pool,
     Difficulty difficulty,
+    int maxWords,
+    int seed,
+  ) {
+    final int preferred = difficulty.index + 1;
+    final List<BankEntry> near =
+        pool.where((e) => (e.level - preferred).abs() <= 1).toList();
+    final List<BankEntry> deck =
+        List<BankEntry>.of(near.length >= maxWords * 2 ? near : pool)
+          ..sort((a, b) => a.answer.compareTo(b.answer));
+    deck.shuffle(Random(seed));
+    return deck;
+  }
+
+  static _Board _build(
+    List<BankEntry> queue,
     int size,
     int maxWords,
     Random random,
   ) {
-    final List<BankEntry> shuffled = List<BankEntry>.of(pool)..shuffle(random);
-    final int preferred = difficulty.index + 1;
+    // The next few words in the queue are tried first, in a random order.
+    final List<BankEntry> window = queue.take(maxWords).toList()
+      ..shuffle(random);
+    final List<BankEntry> candidates = [...window, ...queue.skip(maxWords)];
 
-    // Prefer questions whose level matches the chosen difficulty.
-    final List<int> order = List<int>.generate(shuffled.length, (i) => i);
-    order.sort((a, b) {
-      final int byLevel = (shuffled[a].level - preferred)
-          .abs()
-          .compareTo((shuffled[b].level - preferred).abs());
-      return byLevel != 0 ? byLevel : a.compareTo(b);
-    });
-    final List<BankEntry> candidates = [
-      for (final int i in order.take(maxWords * 3)) shuffled[i],
-    ];
-
-    // Start with the longest word across the middle.
-    BankEntry first = candidates.first;
-    for (final BankEntry entry in candidates) {
+    // Start with the longest of those words across the middle.
+    BankEntry first = window.first;
+    for (final BankEntry entry in window) {
       if (entry.answer.length > first.answer.length) {
         first = entry;
       }

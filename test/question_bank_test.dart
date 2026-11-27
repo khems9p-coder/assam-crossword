@@ -52,6 +52,25 @@ void main() {
     }
   });
 
+  test('the next puzzle mostly uses different words', () {
+    Set<String> wordsOf(String topicId, int number) => PuzzleService.build(
+          topicId,
+          Difficulty.easy,
+          number,
+        )!
+            .words
+            .map((w) => w.answer)
+            .toSet();
+    int repeated = 0;
+    int total = 0;
+    for (final Topic topic in allTopics) {
+      final Set<String> second = wordsOf(topic.id, 2);
+      repeated += second.intersection(wordsOf(topic.id, 1)).length;
+      total += second.length;
+    }
+    expect(repeated / total, lessThan(0.5));
+  });
+
   test('the same puzzle number always gives the same puzzle', () {
     final CrosswordPuzzle a =
         PuzzleService.build('eng_idioms', Difficulty.medium, 2)!;

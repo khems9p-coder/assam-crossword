@@ -98,7 +98,40 @@ void main() {
       expect(game.entryAt(0, 0), 'T');
       expect(game.entryAt(0, 1), 'E');
       expect(game.entryAt(0, 2), 'A');
-      expect(game.selected, const CellPos(0, 2));
+    });
+
+    test('a solved word turns green, locks and moves on', () {
+      game.enterLetter('T');
+      game.enterLetter('E');
+      game.enterLetter('A');
+      expect(game.isWordSolved(word('TEA')), isTrue);
+      expect(game.isInSolvedWord(0, 1), isTrue);
+      expect(game.isLocked(0, 0), isTrue);
+      expect(game.activeWord?.answer, 'GAS');
+    });
+
+    test('typing skips over locked letters', () {
+      game.enterLetter('T');
+      game.enterLetter('E');
+      game.enterLetter('A');
+      game.selectCell(0, 0);
+      expect(game.activeWord?.answer, 'TIGER');
+      game.enterLetter('X');
+      expect(game.entryAt(0, 0), 'T');
+      expect(game.entryAt(1, 0), 'X');
+    });
+
+    test('backspace and clear never delete locked letters', () {
+      game.enterLetter('T');
+      game.enterLetter('E');
+      game.enterLetter('A');
+      game.selectWord(word('TIGER'));
+      game.backspace();
+      game.clearWord();
+      expect(game.entryAt(0, 0), 'T');
+      game.selectWord(word('TEA'));
+      game.clearWord();
+      expect(game.entryAt(0, 1), 'E');
     });
 
     test('tapping the same square switches Across and Down', () {
@@ -132,11 +165,38 @@ void main() {
       expect(game.completion, 1.0);
     });
 
+    test('starter letters are filled in and locked', () {
+      final CrosswordEngine easy =
+          CrosswordEngine(SamplePuzzles.assamStarter, givenShare: 0.34);
+      int countGivens() {
+        int count = 0;
+        for (int r = 0; r < easy.rows; r++) {
+          for (int c = 0; c < easy.cols; c++) {
+            if (!easy.isBlock(r, c) && easy.isGiven(r, c)) {
+              count++;
+              expect(easy.isLocked(r, c), isTrue);
+              expect(easy.entryAt(r, c), isNotEmpty);
+            }
+          }
+        }
+        return count;
+      }
+
+      final int givens = countGivens();
+      expect(givens, greaterThan(0));
+      for (final CrosswordWord w in easy.puzzle.words) {
+        expect(w.cells.every((p) => easy.isGiven(p.row, p.col)), isFalse);
+      }
+      easy.restart();
+      expect(countGivens(), givens);
+    });
+
     test('restart clears everything', () {
       game.enterLetter('T');
       game.revealLetter();
       game.restart();
       expect(game.filledCells, 0);
+      expect(game.solvedWordCount, 0);
       expect(game.lettersRevealed, 0);
       expect(game.activeWord?.answer, 'TEA');
     });

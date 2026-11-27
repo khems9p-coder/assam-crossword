@@ -44,6 +44,8 @@ class CrosswordGrid extends StatelessWidget {
                           inActiveWord: engine.isInActiveWord(r, c),
                           isWrong: engine.isWrong(r, c),
                           isRevealed: engine.isRevealed(r, c),
+                          isSolved: engine.isInSolvedWord(r, c),
+                          isGiven: engine.isGiven(r, c),
                           letter: engine.isBlock(r, c) ? '' : engine.entryAt(r, c),
                           number: engine.numberAt(r, c),
                           onTap: () => engine.selectCell(r, c),

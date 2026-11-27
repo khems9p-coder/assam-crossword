@@ -48,17 +48,18 @@ class PuzzleService {
       topicId: topicId,
       difficulty: difficulty,
       entries: QuestionBank.instance.entriesFor(topicId),
-      seed: _seed(topicId, difficulty, number),
+      seed: _seed(topicId, difficulty),
+      number: number,
     );
   }
 
   /// A fixed number made from the topic name, so puzzles are the same on
   /// every device.
-  static int _seed(String topicId, Difficulty difficulty, int number) {
+  static int _seed(String topicId, Difficulty difficulty) {
     int hash = 17;
     for (final int unit in topicId.codeUnits) {
       hash = (hash * 31 + unit) & 0x7fffffff;
     }
-    return (hash + difficulty.index * 100003 + number * 7919) & 0x7fffffff;
+    return (hash + difficulty.index * 100003) & 0x7fffffff;
   }
 }

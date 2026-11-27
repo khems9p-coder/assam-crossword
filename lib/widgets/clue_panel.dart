@@ -101,6 +101,9 @@ class ClueList extends StatelessWidget {
           ),
           title: Text(word.clue),
           subtitle: Text('${word.length} letters'),
+          trailing: engine.isWordSolved(word)
+              ? const Icon(Icons.check_circle_rounded, color: Colors.green)
+              : null,
           onTap: () {
             engine.selectWord(word);
             onClueTap?.call();

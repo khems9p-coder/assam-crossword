@@ -86,7 +86,10 @@ class _GameScreenState extends State<GameScreen> {
     }
     _puzzle = puzzle;
     _validation = PuzzleValidator.validate(puzzle);
-    _engine = CrosswordEngine(puzzle)..addListener(_onEngineChanged);
+    _engine = CrosswordEngine(
+      puzzle,
+      givenShare: CrosswordEngine.givenShareFor(_difficulty),
+    )..addListener(_onEngineChanged);
   }
 
   @override

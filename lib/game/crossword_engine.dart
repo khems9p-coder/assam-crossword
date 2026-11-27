@@ -1,12 +1,21 @@
+import 'dart:math' show Random;
+
 import 'package:flutter/foundation.dart';
 
 import '../models/crossword.dart';
+import '../models/difficulty.dart';
 
 /// The rules of play for one crossword.
-/// The screen (Phase 7B) only shows what this engine says and passes taps
-/// and key presses to it.
+/// The screen only shows what this engine says and passes taps and key
+/// presses to it.
+///
+/// A word that is fully correct turns green and its letters are locked:
+/// they cannot be typed over or deleted. Revealed letters are locked too.
+///
+/// Starter letters: a few squares are filled in at the start (more on
+/// Easy, fewer on Hard). They are locked and never fill a whole word.
 class CrosswordEngine extends ChangeNotifier {
-  CrosswordEngine(this.puzzle)
+  CrosswordEngine(this.puzzle, {double givenShare = 0})
       : _solution = List.generate(
           puzzle.rows,
           (_) => List<String?>.filled(puzzle.cols, null),
@@ -41,8 +50,17 @@ class CrosswordEngine extends ChangeNotifier {
       ..._sorted(ClueDirection.across),
       ..._sorted(ClueDirection.down),
     ];
+    _placeGivens(givenShare);
+    _fillGivens();
     _selectFirst();
   }
+
+  /// How much of each word is filled in at the start.
+  static double givenShareFor(Difficulty difficulty) => switch (difficulty) {
+        Difficulty.easy => 0.34,
+        Difficulty.medium => 0.2,
+        Difficulty.hard => 0.1,
+      };
 
   final CrosswordPuzzle puzzle;
   final List<List<String?>> _solution;
@@ -50,6 +68,9 @@ class CrosswordEngine extends ChangeNotifier {
   final Map<CellPos, int> _numbers = {};
   final Set<CellPos> _revealed = {};
   final Set<CellPos> _wrong = {};
+  final Set<CellPos> _given = {};
+  final Set<CrosswordWord> _solved = {};
+  final Set<CellPos> _solvedCells = {};
   late final List<CrosswordWord> _orderedWords;
 
   CellPos? _selected;
@@ -71,6 +92,7 @@ class CrosswordEngine extends ChangeNotifier {
   int get lettersRevealed => _lettersRevealed;
   int get wordsRevealed => _wordsRevealed;
   int get checksUsed => _checksUsed;
+  int get solvedWordCount => _solved.length;
 
   List<CrosswordWord> get acrossWords =>
       _orderedWords.where((w) => w.direction == ClueDirection.across).toList();
@@ -88,9 +110,21 @@ class CrosswordEngine extends ChangeNotifier {
 
   bool isRevealed(int row, int col) => _revealed.contains(CellPos(row, col));
 
+  /// True for a starter letter that was filled in at the start.
+  bool isGiven(int row, int col) => _given.contains(CellPos(row, col));
+
   bool isWrong(int row, int col) => _wrong.contains(CellPos(row, col));
 
   bool isSelected(int row, int col) => _selected == CellPos(row, col);
+
+  /// True when this square belongs to a word that is fully correct.
+  bool isInSolvedWord(int row, int col) =>
+      _solvedCells.contains(CellPos(row, col));
+
+  /// True when the letter here can no longer be changed.
+  bool isLocked(int row, int col) => _isLocked(CellPos(row, col));
+
+  bool isWordSolved(CrosswordWord word) => _solved.contains(word);
 
   CrosswordWord? wordAt(CellPos cell, ClueDirection direction) {
     for (final CrosswordWord w in puzzle.words) {
@@ -153,6 +187,7 @@ class CrosswordEngine extends ChangeNotifier {
   // ---------- Moving around ----------
 
   /// Tap a square. Tapping the same square again switches Across/Down.
+  /// On a new square, an unsolved word is preferred over a solved one.
   void selectCell(int row, int col) {
     if (isBlock(row, col)) {
       return;
@@ -164,7 +199,12 @@ class CrosswordEngine extends ChangeNotifier {
       }
     } else {
       _selected = cell;
-      if (wordAt(cell, _direction) == null) {
+      final CrosswordWord? current = wordAt(cell, _direction);
+      final CrosswordWord? other = wordAt(cell, _direction.other);
+      if (current == null ||
+          (_solved.contains(current) &&
+              other != null &&
+              !_solved.contains(other))) {
         _direction = _direction.other;
       }
     }
@@ -206,8 +246,22 @@ class CrosswordEngine extends ChangeNotifier {
     selectWord(_orderedWords[index]);
   }
 
+  /// After a word is solved, move on to the next word that is not solved.
+  void _goToNextUnsolved(CrosswordWord from) {
+    final int start = _orderedWords.indexOf(from);
+    for (int step = 1; step <= _orderedWords.length; step++) {
+      final CrosswordWord word =
+          _orderedWords[(start + step) % _orderedWords.length];
+      if (!_solved.contains(word)) {
+        selectWord(word);
+        return;
+      }
+    }
+  }
+
   // ---------- Typing ----------
 
+  /// Types a letter in the selected square, skipping locked squares.
   void enterLetter(String letter) {
     final CellPos? cell = _selected;
     final CrosswordWord? word = activeWord;
@@ -218,30 +272,51 @@ class CrosswordEngine extends ChangeNotifier {
     if (!_oneLetter.hasMatch(upper)) {
       return;
     }
-    if (!_revealed.contains(cell)) {
-      _entries[cell.row][cell.col] = upper;
-      _wrong.remove(cell);
+
+    int index = word.indexOf(cell);
+    while (index < word.length && _isLocked(word.cellAt(index))) {
+      index++;
     }
-    final int index = word.indexOf(cell);
-    if (index < word.length - 1) {
-      _selected = word.cellAt(index + 1);
+    if (index >= word.length) {
+      return; // Every square left in this word is locked.
+    }
+    final CellPos target = word.cellAt(index);
+    _entries[target.row][target.col] = upper;
+    _wrong.remove(target);
+    _selected = target;
+
+    int next = index + 1;
+    while (next < word.length && _isLocked(word.cellAt(next))) {
+      next++;
+    }
+    if (next < word.length) {
+      _selected = word.cellAt(next);
+    }
+
+    final List<CrosswordWord> newlySolved = _refreshSolved();
+    if (newlySolved.contains(word) && !isComplete) {
+      _goToNextUnsolved(word);
     }
     notifyListeners();
   }
 
   /// Delete the letter here, or if empty, step back and delete that one.
+  /// Locked letters are never deleted.
   void backspace() {
     final CellPos? cell = _selected;
     final CrosswordWord? word = activeWord;
     if (cell == null || word == null) {
       return;
     }
-    if (_entries[cell.row][cell.col].isNotEmpty) {
+    if (_entries[cell.row][cell.col].isNotEmpty && !_isLocked(cell)) {
       _clearCell(cell);
     } else {
-      final int index = word.indexOf(cell);
-      if (index > 0) {
-        final CellPos previous = word.cellAt(index - 1);
+      int index = word.indexOf(cell) - 1;
+      while (index >= 0 && _isLocked(word.cellAt(index))) {
+        index--;
+      }
+      if (index >= 0) {
+        final CellPos previous = word.cellAt(index);
         _selected = previous;
         _clearCell(previous);
       }
@@ -272,7 +347,7 @@ class CrosswordEngine extends ChangeNotifier {
   }
 
   void _clearCell(CellPos cell) {
-    if (_revealed.contains(cell)) {
+    if (_isLocked(cell)) {
       return;
     }
     _entries[cell.row][cell.col] = '';
@@ -327,6 +402,7 @@ class CrosswordEngine extends ChangeNotifier {
     }
     _reveal(cell);
     _lettersRevealed++;
+    _refreshSolved();
     notifyListeners();
   }
 
@@ -344,6 +420,10 @@ class CrosswordEngine extends ChangeNotifier {
     }
     if (changed) {
       _wordsRevealed++;
+      _refreshSolved();
+      if (!isComplete) {
+        _goToNextUnsolved(word);
+      }
       notifyListeners();
     }
   }
@@ -351,10 +431,73 @@ class CrosswordEngine extends ChangeNotifier {
   bool _isCorrect(CellPos cell) =>
       _entries[cell.row][cell.col] == _solution[cell.row][cell.col];
 
+  bool _isLocked(CellPos cell) =>
+      _given.contains(cell) ||
+      _revealed.contains(cell) ||
+      _solvedCells.contains(cell);
+
+  /// Chooses the starter letters. The same puzzle always gets the same
+  /// ones, and no word is ever completely filled in.
+  void _placeGivens(double share) {
+    if (share <= 0) {
+      return;
+    }
+    int seed = 7;
+    for (final int unit in puzzle.id.codeUnits) {
+      seed = (seed * 31 + unit) & 0x7fffffff;
+    }
+    final Random random = Random(seed);
+    for (final CrosswordWord word in _orderedWords) {
+      final int wanted = (word.length * share).round();
+      int count = word.cells.where(_given.contains).length;
+      final List<CellPos> cells = word.cells..shuffle(random);
+      for (final CellPos cell in cells) {
+        if (count >= wanted) {
+          break;
+        }
+        if (_given.contains(cell)) {
+          continue;
+        }
+        _given.add(cell);
+        final bool fillsAWord = puzzle.words.any(
+          (w) => w.contains(cell) && w.cells.every(_given.contains),
+        );
+        if (fillsAWord) {
+          _given.remove(cell);
+          continue;
+        }
+        count++;
+      }
+    }
+  }
+
+  void _fillGivens() {
+    for (final CellPos cell in _given) {
+      _entries[cell.row][cell.col] = _solution[cell.row][cell.col] ?? '';
+    }
+  }
+
   void _reveal(CellPos cell) {
     _entries[cell.row][cell.col] = _solution[cell.row][cell.col] ?? '';
     _revealed.add(cell);
     _wrong.remove(cell);
+  }
+
+  /// Finds words that have just become fully correct and locks them.
+  List<CrosswordWord> _refreshSolved() {
+    final List<CrosswordWord> newlySolved = [];
+    for (final CrosswordWord word in puzzle.words) {
+      if (_solved.contains(word)) {
+        continue;
+      }
+      if (word.cells.every(_isCorrect)) {
+        _solved.add(word);
+        _solvedCells.addAll(word.cells);
+        _wrong.removeAll(word.cells);
+        newlySolved.add(word);
+      }
+    }
+    return newlySolved;
   }
 
   // ---------- Starting again ----------
@@ -367,10 +510,13 @@ class CrosswordEngine extends ChangeNotifier {
     }
     _revealed.clear();
     _wrong.clear();
+    _solved.clear();
+    _solvedCells.clear();
     _incorrectAttempts = 0;
     _lettersRevealed = 0;
     _wordsRevealed = 0;
     _checksUsed = 0;
+    _fillGivens();
     _selectFirst();
     notifyListeners();
   }

@@ -7,6 +7,7 @@ import 'package:assamcrossword/models/difficulty.dart';
 import 'package:assamcrossword/services/local_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:assamcrossword/services/app_state.dart';
+import 'package:assamcrossword/widgets/game_keyboard.dart';
 import 'package:assamcrossword/widgets/menu_button.dart';
 
 Future<void> goToDashboard(WidgetTester tester) async {
@@ -192,15 +193,20 @@ void main() {
     await openMenu(tester, 'Play Game');
     expect(find.textContaining('Birds and Animals'), findsOneWidget);
 
-    await tester.tap(find.text('T'));
+    // Some squares already have starter letters, so count before typing.
+    Finder key(String letter) => find.descendant(
+          of: find.byType(GameKeyboard),
+          matching: find.text(letter),
+        );
+    final int tBefore = find.text('T').evaluate().length;
+    await tester.tap(key('T'));
     await tester.pump();
-    await tester.tap(find.text('E'));
-    await tester.pump();
-    await tester.tap(find.text('A'));
-    await tester.pump();
+    expect(find.text('T').evaluate().length, tBefore + 1);
 
-    expect(find.text('T'), findsNWidgets(2));
-    expect(find.text('E'), findsNWidgets(2));
+    final int eBefore = find.text('E').evaluate().length;
+    await tester.tap(key('E'));
+    await tester.pump();
+    expect(find.text('E').evaluate().length, eBefore + 1);
     expect(find.textContaining('%'), findsOneWidget);
   });
 }

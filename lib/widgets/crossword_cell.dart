@@ -9,6 +9,8 @@ class CrosswordCell extends StatelessWidget {
   final bool inActiveWord;
   final bool isWrong;
   final bool isRevealed;
+  final bool isSolved;
+  final bool isGiven;
   final String letter;
   final int? number;
   final VoidCallback? onTap;
@@ -21,6 +23,8 @@ class CrosswordCell extends StatelessWidget {
     this.inActiveWord = false,
     this.isWrong = false,
     this.isRevealed = false,
+    this.isSolved = false,
+    this.isGiven = false,
     this.letter = '',
     this.number,
     this.onTap,
@@ -40,6 +44,12 @@ class CrosswordCell extends StatelessWidget {
     }
 
     Color background = Colors.white;
+    if (isGiven) {
+      background = Colors.grey.shade300;
+    }
+    if (isSolved) {
+      background = Colors.green.withValues(alpha: 0.18);
+    }
     if (inActiveWord) {
       background = AppColors.gold.withValues(alpha: 0.25);
     }
@@ -50,9 +60,16 @@ class CrosswordCell extends StatelessWidget {
       background = AppColors.gold.withValues(alpha: 0.75);
     }
 
-    final Color textColor = isWrong
-        ? Colors.red.shade700
-        : (isRevealed ? Colors.blueGrey : Colors.black87);
+    Color textColor = Colors.black87;
+    if (isRevealed) {
+      textColor = Colors.blueGrey;
+    }
+    if (isSolved) {
+      textColor = AppColors.forestGreen;
+    }
+    if (isWrong) {
+      textColor = Colors.red.shade700;
+    }
 
     return GestureDetector(
       onTap: onTap,
