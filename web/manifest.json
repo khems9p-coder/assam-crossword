@@ -1,11 +1,11 @@
 {
-    "name": "assamcrossword",
-    "short_name": "assamcrossword",
+    "name": "Assam Crossword",
+    "short_name": "Assam Crossword",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1B5E20",
+    "theme_color": "#1B5E20",
+    "description": "Learn Assam GK, India GK and English vocabulary through crosswords.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
