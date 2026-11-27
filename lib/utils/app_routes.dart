@@ -26,6 +26,7 @@ class AppRoutes {
   static const String category = '/category';
   static const String difficulty = '/difficulty';
   static const String game = '/game';
+  static const String dailyGame = '/daily-game';
   static const String dailyChallenge = '/daily-challenge';
   static const String progress = '/progress';
   static const String achievements = '/achievements';
@@ -46,6 +47,7 @@ class AppRoutes {
     category: (_) => const CategoryScreen(),
     difficulty: (_) => const DifficultyScreen(),
     game: (_) => const GameScreen(),
+    dailyGame: (_) => const GameScreen(daily: true),
     dailyChallenge: (_) => const DailyChallengeScreen(),
     progress: (_) => const ProgressScreen(),
     achievements: (_) => const AchievementScreen(),

@@ -9,6 +9,7 @@ import 'screens/splash_screen.dart';
 import 'services/app_state.dart';
 import 'services/auth_service.dart';
 import 'services/connectivity_service.dart';
+import 'services/daily_service.dart';
 import 'services/local_store.dart';
 import 'services/sound_service.dart';
 import 'theme/app_theme.dart';
@@ -22,6 +23,7 @@ Future<void> main() async {
   try {
     await LocalStore.instance.init();
     await AppState.instance.loadFromDevice();
+    DailyService.refreshStreak();
   } catch (error) {
     debugPrint('Local storage not available: $error');
   }

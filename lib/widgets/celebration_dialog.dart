@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 
+import '../models/achievement.dart';
 import '../services/score_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/helpers.dart';
@@ -77,7 +78,7 @@ class _CelebrationDialogState extends State<CelebrationDialog>
         constraints: const BoxConstraints(maxWidth: 420),
         child: Stack(
           children: [
-            Padding(
+            SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -140,12 +141,57 @@ class _CelebrationDialogState extends State<CelebrationDialog>
                       color: AppColors.forestGreen,
                     ),
                   ),
+                  if (result.dailyStreak != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      '🔥 Daily streak: ${result.dailyStreak} '
+                      '${result.dailyStreak == 1 ? 'day' : 'days'}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                  for (final Achievement badge in result.newAchievements)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.gold.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.gold),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(badge.icon, color: AppColors.forestGreen),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'New badge: ${badge.title}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () =>
-                        Navigator.of(context).pop(FinishChoice.next),
-                    child: const Text('Next Puzzle'),
-                  ),
+                  if (result.isDaily)
+                    FilledButton(
+                      onPressed: () =>
+                          Navigator.of(context).pop(FinishChoice.dashboard),
+                      child: const Text('Done'),
+                    )
+                  else
+                    FilledButton(
+                      onPressed: () =>
+                          Navigator.of(context).pop(FinishChoice.next),
+                      child: const Text('Next Puzzle'),
+                    ),
                   const SizedBox(height: 8),
                   Row(
                     children: [

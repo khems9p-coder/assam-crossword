@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../services/app_state.dart';
 import '../services/auth_service.dart';
+import '../services/daily_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_routes.dart';
 import '../utils/constants.dart';
@@ -67,32 +68,39 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   const _WelcomeHeader(),
                   const SizedBox(height: 16),
-                  const Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          label: 'Points',
-                          value: '0',
-                          icon: Icons.star_rounded,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _StatCard(
-                          label: 'Level',
-                          value: '1',
-                          icon: Icons.trending_up_rounded,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _StatCard(
-                          label: 'Daily Challenge',
-                          value: 'Not done',
-                          icon: Icons.today_rounded,
-                        ),
-                      ),
-                    ],
+                  ListenableBuilder(
+                    listenable: AppState.instance,
+                    builder: (context, _) {
+                      final bool dailyDone =
+                          DailyService.isDone(DailyService.today());
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _StatCard(
+                              label: 'Points',
+                              value: '${AppState.instance.stats.totalPoints}',
+                              icon: Icons.star_rounded,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _StatCard(
+                              label: 'Level',
+                              value: '${AppState.instance.stats.level}',
+                              icon: Icons.trending_up_rounded,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _StatCard(
+                              label: 'Daily Challenge',
+                              value: dailyDone ? 'Done ✓' : 'Not done',
+                              icon: Icons.today_rounded,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   const _CurrentGameCard(),

@@ -8,6 +8,7 @@ import '../game/puzzle_validator.dart';
 import '../models/crossword.dart';
 import '../models/difficulty.dart';
 import '../services/app_state.dart';
+import '../services/daily_service.dart';
 import '../services/puzzle_service.dart';
 import '../services/score_service.dart';
 import '../services/sound_service.dart';
@@ -31,7 +32,10 @@ enum _Tool {
 }
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  /// True for the Daily Challenge, false for normal puzzles.
+  final bool daily;
+
+  const GameScreen({super.key, this.daily = false});
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -41,6 +45,7 @@ class _GameScreenState extends State<GameScreen>
     with WidgetsBindingObserver {
   late final String? _topicId;
   late final Difficulty _difficulty;
+  late final DateTime _day;
   int _number = 1;
   bool _loading = true;
   bool _needsTopic = false;
@@ -59,8 +64,14 @@ class _GameScreenState extends State<GameScreen>
   @override
   void initState() {
     super.initState();
-    _topicId = AppState.instance.topicId;
-    _difficulty = AppState.instance.difficulty;
+    _day = DailyService.today();
+    if (widget.daily) {
+      _topicId = DailyService.topicFor(_day).id;
+      _difficulty = DailyService.difficulty;
+    } else {
+      _topicId = AppState.instance.topicId;
+      _difficulty = AppState.instance.difficulty;
+    }
     WidgetsBinding.instance.addObserver(this);
     _prepare();
   }
@@ -85,9 +96,11 @@ class _GameScreenState extends State<GameScreen>
       _message = 'Choose a topic to start a crossword.';
       return;
     }
-    _number = PuzzleService.currentNumber(topicId, _difficulty);
-    final CrosswordPuzzle? puzzle =
-        PuzzleService.build(topicId, _difficulty, _number);
+    _number =
+        widget.daily ? 0 : PuzzleService.currentNumber(topicId, _difficulty);
+    final CrosswordPuzzle? puzzle = widget.daily
+        ? DailyService.build(_day)
+        : PuzzleService.build(topicId, _difficulty, _number);
     if (puzzle == null) {
       _needsTopic = true;
       _message = 'There are not enough questions for this topic yet. '
@@ -173,12 +186,15 @@ class _GameScreenState extends State<GameScreen>
       return;
     }
     final int seconds = _seconds;
-    await PuzzleService.markCompleted(topicId, _difficulty, _number);
+    if (!widget.daily) {
+      await PuzzleService.markCompleted(topicId, _difficulty, _number);
+    }
     final GameResult result = await ScoreService.record(
       topicId: topicId,
       difficulty: _difficulty,
       engine: engine,
       seconds: seconds,
+      isDaily: widget.daily,
     );
     if (!mounted) {
       return;

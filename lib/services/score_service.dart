@@ -1,8 +1,11 @@
 import '../data/category_data.dart';
 import '../game/crossword_engine.dart';
+import '../models/achievement.dart';
 import '../models/difficulty.dart';
 import '../models/player_stats.dart';
+import 'achievement_service.dart';
 import 'app_state.dart';
+import 'daily_service.dart';
 import 'local_store.dart';
 
 /// What the player earned for one finished puzzle.
@@ -13,6 +16,9 @@ class GameResult {
   final bool countsForBestTime;
   final bool isNewBest;
   final int? previousBest;
+  final bool isDaily;
+  final int? dailyStreak;
+  final List<Achievement> newAchievements;
 
   const GameResult({
     required this.seconds,
@@ -21,13 +27,19 @@ class GameResult {
     required this.countsForBestTime,
     required this.isNewBest,
     required this.previousBest,
+    this.isDaily = false,
+    this.dailyStreak,
+    this.newAchievements = const [],
   });
 }
 
-/// Works out points and stars, saves best times and updates the
-/// player's stats when a puzzle is finished.
+/// Works out points and stars, saves best times, updates the player's
+/// stats and unlocks achievements when a puzzle is finished.
 class ScoreService {
   ScoreService._();
+
+  /// Extra points for finishing the Daily Challenge (first time each day).
+  static const int dailyBonus = 50;
 
   static int basePoints(Difficulty difficulty) => switch (difficulty) {
         Difficulty.easy => 100,
@@ -91,24 +103,40 @@ class ScoreService {
     required Difficulty difficulty,
     required CrosswordEngine engine,
     required int seconds,
+    bool isDaily = false,
   }) async {
-    final int points = pointsFor(
+    final int lettersRevealed = engine.lettersRevealed;
+    final int wordsRevealed = engine.wordsRevealed;
+    final int mistakes = engine.incorrectAttempts;
+
+    // Daily Challenge: only the first finish of the day counts for the
+    // streak and the bonus.
+    bool firstDailyFinish = false;
+    if (isDaily) {
+      firstDailyFinish = await DailyService.markDone(DailyService.today());
+    }
+
+    int points = pointsFor(
       difficulty: difficulty,
       wordCount: engine.puzzle.words.length,
       seconds: seconds,
-      lettersRevealed: engine.lettersRevealed,
-      wordsRevealed: engine.wordsRevealed,
-      mistakes: engine.incorrectAttempts,
+      lettersRevealed: lettersRevealed,
+      wordsRevealed: wordsRevealed,
+      mistakes: mistakes,
     );
+    if (firstDailyFinish) {
+      points += dailyBonus;
+    }
     final int stars = starsFor(
-      lettersRevealed: engine.lettersRevealed,
-      wordsRevealed: engine.wordsRevealed,
-      mistakes: engine.incorrectAttempts,
+      lettersRevealed: lettersRevealed,
+      wordsRevealed: wordsRevealed,
+      mistakes: mistakes,
     );
 
-    final bool counts = engine.wordsRevealed == 0;
-    final int? previous = bestTime(topicId, difficulty);
-    final bool isNewBest = counts && (previous == null || seconds < previous);
+    final bool counts = wordsRevealed == 0;
+    final int? previous = isDaily ? null : bestTime(topicId, difficulty);
+    final bool isNewBest =
+        !isDaily && counts && (previous == null || seconds < previous);
     if (isNewBest) {
       final Map<String, dynamic> times = Map<String, dynamic>.from(
         LocalStore.instance.readJson(LocalStore.keyBestTimes) ??
@@ -118,7 +146,9 @@ class ScoreService {
       await LocalStore.instance.writeJson(LocalStore.keyBestTimes, times);
     }
 
-    _updateStats(
+    final PlayerStats old = AppState.instance.stats;
+    PlayerStats updated = _updatedStats(
+      old: old,
       topicId: topicId,
       difficulty: difficulty,
       engine: engine,
@@ -127,6 +157,35 @@ class ScoreService {
       countsForBestTime: counts,
     );
 
+    int? dailyStreak;
+    if (isDaily) {
+      dailyStreak = DailyService.currentStreak();
+      updated = updated.copyWith(
+        currentStreak: dailyStreak,
+        bestStreak:
+            dailyStreak > updated.bestStreak ? dailyStreak : updated.bestStreak,
+        dailyCompleted: updated.dailyCompleted + (firstDailyFinish ? 1 : 0),
+      );
+    }
+
+    final Set<String> earned = AchievementService.earned(
+      updated,
+      perfectGame: mistakes == 0 && lettersRevealed == 0 && wordsRevealed == 0,
+      speedyGame:
+          AchievementService.isSpeedy(difficulty, seconds, wordsRevealed),
+    );
+    final List<Achievement> fresh =
+        AchievementService.newOnes(old.unlockedAchievements, earned);
+    if (fresh.isNotEmpty) {
+      updated = updated.copyWith(
+        unlockedAchievements: {
+          ...old.unlockedAchievements,
+          for (final Achievement a in fresh) a.id,
+        },
+      );
+    }
+    AppState.instance.updateStats(updated);
+
     return GameResult(
       seconds: seconds,
       points: points,
@@ -134,6 +193,9 @@ class ScoreService {
       countsForBestTime: counts,
       isNewBest: isNewBest,
       previousBest: previous,
+      isDaily: isDaily,
+      dailyStreak: dailyStreak,
+      newAchievements: fresh,
     );
   }
 
@@ -148,7 +210,8 @@ class ScoreService {
     return null;
   }
 
-  static void _updateStats({
+  static PlayerStats _updatedStats({
+    required PlayerStats old,
     required String topicId,
     required Difficulty difficulty,
     required CrosswordEngine engine,
@@ -156,7 +219,6 @@ class ScoreService {
     required int points,
     required bool countsForBestTime,
   }) {
-    final PlayerStats old = AppState.instance.stats;
     final int totalPoints = old.totalPoints + points;
 
     final int? oldBest = old.bestTimeSeconds;
@@ -170,6 +232,8 @@ class ScoreService {
     if (area != null) {
       byArea[area] = (byArea[area] ?? 0) + 1;
     }
+    final Map<String, int> byTopic = Map<String, int>.of(old.completedByTopic);
+    byTopic[topicId] = (byTopic[topicId] ?? 0) + 1;
     final Map<Difficulty, int> byDifficulty =
         Map<Difficulty, int>.of(old.completedByDifficulty);
     byDifficulty[difficulty] = (byDifficulty[difficulty] ?? 0) + 1;
@@ -178,7 +242,7 @@ class ScoreService {
     final int words = engine.puzzle.words.length;
     final int correct = (words - engine.wordsRevealed).clamp(0, words);
 
-    AppState.instance.updateStats(PlayerStats(
+    return old.copyWith(
       gamesPlayed: old.gamesPlayed + 1,
       puzzlesCompleted: old.puzzlesCompleted + 1,
       totalPoints: totalPoints,
@@ -187,12 +251,9 @@ class ScoreService {
       totalTimeSeconds: old.totalTimeSeconds + seconds,
       correctAnswers: old.correctAnswers + correct,
       totalAnswers: old.totalAnswers + words,
-      currentStreak: old.currentStreak,
-      bestStreak: old.bestStreak,
-      dailyCompleted: old.dailyCompleted,
       completedByArea: byArea,
+      completedByTopic: byTopic,
       completedByDifficulty: byDifficulty,
-      unlockedAchievements: old.unlockedAchievements,
-    ));
+    );
   }
 }
