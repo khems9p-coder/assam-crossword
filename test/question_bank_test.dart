@@ -23,8 +23,8 @@ void main() {
     expect(QuestionBank.instance.totalEntries, greaterThanOrEqualTo(500));
   });
 
-  test('all 34 topics have at least 12 questions', () {
-    expect(allTopics.length, 34);
+  test('all 38 topics have at least 12 questions', () {
+    expect(allTopics.length, 38);
     for (final Topic topic in allTopics) {
       expect(
         QuestionBank.instance.entriesFor(topic.id).length,

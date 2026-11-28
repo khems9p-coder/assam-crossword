@@ -70,6 +70,19 @@ class CategoryData {
       ],
     ),
     SubjectArea(
+      id: 'world',
+      name: 'World General Knowledge',
+      description:
+          'World geography, capitals and currencies, history and organisations.',
+      icon: Icons.public_rounded,
+      topics: [
+        Topic('world_geography', 'World Geography'),
+        Topic('world_capitals', 'Capitals and Currencies'),
+        Topic('world_history', 'World History'),
+        Topic('world_organisations', 'World Organisations'),
+      ],
+    ),
+    SubjectArea(
       id: 'english',
       name: 'General English Vocabulary',
       description: 'Synonyms, antonyms, idioms, spelling and exam vocabulary.',
