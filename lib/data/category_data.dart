@@ -83,6 +83,20 @@ class CategoryData {
       ],
     ),
     SubjectArea(
+      id: 'science',
+      name: 'Science and Nature',
+      description:
+          'Physics, chemistry, the human body, space and the environment.',
+      icon: Icons.science_rounded,
+      topics: [
+        Topic('sci_physics', 'Physics'),
+        Topic('sci_chemistry', 'Chemistry'),
+        Topic('sci_biology', 'Biology and Human Body'),
+        Topic('sci_space', 'Space and Astronomy'),
+        Topic('sci_environment', 'Environment and Nature'),
+      ],
+    ),
+    SubjectArea(
       id: 'english',
       name: 'General English Vocabulary',
       description: 'Synonyms, antonyms, idioms, spelling and exam vocabulary.',
