@@ -97,6 +97,17 @@ class CategoryData {
       ],
     ),
     SubjectArea(
+      id: 'sports',
+      name: 'Sports and Games',
+      description: 'Cricket, the Olympics, football, hockey, chess and more.',
+      icon: Icons.sports_soccer_rounded,
+      topics: [
+        Topic('sport_cricket', 'Cricket'),
+        Topic('sport_olympics', 'Olympics and Athletics'),
+        Topic('sport_games', 'Football and Other Sports'),
+      ],
+    ),
+    SubjectArea(
       id: 'english',
       name: 'General English Vocabulary',
       description: 'Synonyms, antonyms, idioms, spelling and exam vocabulary.',

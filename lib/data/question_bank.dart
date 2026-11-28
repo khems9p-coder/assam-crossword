@@ -39,6 +39,7 @@ class QuestionBank {
     'assets/data/india_bank_4.json',
     'assets/data/world_bank.json',
     'assets/data/science_bank.json',
+    'assets/data/sports_bank.json',
     'assets/data/english_bank.json',
     'assets/data/english_bank_2.json',
   ];
