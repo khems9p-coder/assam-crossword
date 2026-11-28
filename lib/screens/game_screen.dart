@@ -54,6 +54,12 @@ class _GameScreenState extends State<GameScreen>
   ValidationResult? _validation;
   CrosswordEngine? _engine;
   bool _celebrated = false;
+
+  /// Set once the puzzle is finished, so the results can be shown again.
+  GameResult? _result;
+
+  /// True while the player looks over the solved grid after finishing.
+  bool _reviewing = false;
   Timer? _clock;
   int _seconds = 0;
   bool _inBackground = false;
@@ -199,8 +205,24 @@ class _GameScreenState extends State<GameScreen>
     if (!mounted) {
       return;
     }
+    _result = result;
     SoundService.instance.play(Sfx.complete);
     SoundService.instance.buzz(Buzz.celebrate);
+    // Let the player see the finished grid for a moment first.
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    if (!mounted || !engine.isComplete) {
+      return;
+    }
+    await _showResults(engine);
+  }
+
+  /// Shows the celebration and acts on the player's choice.
+  Future<void> _showResults(CrosswordEngine engine) async {
+    final CrosswordPuzzle? puzzle = _puzzle;
+    final GameResult? result = _result;
+    if (puzzle == null || result == null) {
+      return;
+    }
     final FinishChoice? choice = await CelebrationDialog.show(
       context,
       title: puzzle.title,
@@ -210,6 +232,8 @@ class _GameScreenState extends State<GameScreen>
       return;
     }
     switch (choice) {
+      case FinishChoice.review:
+        setState(() => _reviewing = true);
       case FinishChoice.replay:
         _restart(engine);
       case FinishChoice.next:
@@ -224,8 +248,19 @@ class _GameScreenState extends State<GameScreen>
     SoundService.instance.play(Sfx.shuffle);
     _combo = 0;
     _lastSolveTime = null;
+    _reviewing = false;
+    _result = null;
     engine.restart();
     setState(() => _seconds = 0);
+  }
+
+  /// Leaves the solved grid: the next puzzle, or back for the daily one.
+  void _leaveReview() {
+    if (widget.daily) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pushReplacementNamed(AppRoutes.game);
+    }
   }
 
   Future<void> _confirmRestart(CrosswordEngine engine) async {
@@ -515,11 +550,18 @@ class _GameScreenState extends State<GameScreen>
                             onShowClues: () => _showClueSheet(engine),
                           ),
                           const Spacer(),
-                          GameKeyboard(
-                            onLetter: engine.enterLetter,
-                            onBackspace: engine.backspace,
-                            keyHeight: keyHeight,
-                          ),
+                          if (_reviewing)
+                            _ReviewBar(
+                              daily: widget.daily,
+                              onResults: () => _showResults(engine),
+                              onNext: () => _leaveReview(),
+                            )
+                          else
+                            GameKeyboard(
+                              onLetter: engine.enterLetter,
+                              onBackspace: engine.backspace,
+                              keyHeight: keyHeight,
+                            ),
                         ],
                       ),
                     ),
@@ -553,10 +595,17 @@ class _GameScreenState extends State<GameScreen>
                   onShowClues:
                       side || tabs ? null : () => _showClueSheet(engine),
                 ),
-                GameKeyboard(
-                  onLetter: engine.enterLetter,
-                  onBackspace: engine.backspace,
-                ),
+                if (_reviewing)
+                  _ReviewBar(
+                    daily: widget.daily,
+                    onResults: () => _showResults(engine),
+                    onNext: () => _leaveReview(),
+                  )
+                else
+                  GameKeyboard(
+                    onLetter: engine.enterLetter,
+                    onBackspace: engine.backspace,
+                  ),
               ],
             );
             if (!side) {
@@ -578,6 +627,67 @@ class _GameScreenState extends State<GameScreen>
           },
         );
       },
+    );
+  }
+}
+
+/// Shown in place of the keyboard while the player looks over a
+/// finished puzzle.
+class _ReviewBar extends StatelessWidget {
+  final bool daily;
+  final VoidCallback onResults;
+  final VoidCallback onNext;
+
+  const _ReviewBar({
+    required this.daily,
+    required this.onResults,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check_circle_rounded, color: AppColors.forestGreen),
+                const SizedBox(width: 6),
+                const Flexible(
+                  child: Text(
+                    'Puzzle solved! Look over your answers.',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onResults,
+                    icon: const Icon(Icons.emoji_events_rounded),
+                    label: const Text('Results'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: onNext,
+                    child: Text(daily ? 'Done' : 'Next Puzzle'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

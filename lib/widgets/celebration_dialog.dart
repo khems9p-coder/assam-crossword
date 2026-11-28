@@ -8,7 +8,7 @@ import '../theme/app_theme.dart';
 import '../utils/helpers.dart';
 
 /// What the player chose after finishing a puzzle.
-enum FinishChoice { dashboard, replay, next }
+enum FinishChoice { dashboard, replay, next, review }
 
 /// The "Puzzle complete!" screen: confetti, stars, time and points.
 class CelebrationDialog extends StatefulWidget {
@@ -193,6 +193,13 @@ class _CelebrationDialogState extends State<CelebrationDialog>
                       child: const Text('Next Puzzle'),
                     ),
                   const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        Navigator.of(context).pop(FinishChoice.review),
+                    icon: const Icon(Icons.grid_on_rounded),
+                    label: const Text('View solved puzzle'),
+                  ),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       Expanded(
