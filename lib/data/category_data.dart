@@ -31,7 +31,7 @@ class CategoryData {
       id: 'assam',
       name: 'Assam General Knowledge',
       description:
-          'Geography, history, culture, wildlife, economy and administration of Assam.',
+          'Geography, history, culture, people, festivals, tribes, temples and more.',
       icon: Icons.landscape_rounded,
       topics: [
         Topic('assam_geography', 'Assam Geography'),
@@ -40,6 +40,11 @@ class CategoryData {
         Topic('assam_wildlife', 'Birds and Animals'),
         Topic('assam_economy', 'Assam Economy'),
         Topic('assam_administration', 'Assam Administration'),
+        Topic('assam_literature', 'Literature and Language'),
+        Topic('assam_festivals', 'Festivals and Fairs'),
+        Topic('assam_people', 'Famous Assamese People'),
+        Topic('assam_tribes', 'Tribes and Communities'),
+        Topic('assam_temples', 'Temples and Monuments'),
       ],
     ),
     SubjectArea(
