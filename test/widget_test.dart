@@ -20,6 +20,14 @@ Future<void> goToDashboard(WidgetTester tester) async {
 
 Future<void> openMenu(WidgetTester tester, String label) async {
   final Finder button = find.widgetWithText(MenuButton, label);
+  if (button.evaluate().isEmpty) {
+    // Account and app pages live in the side menu, not on the dashboard.
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ListTile, label));
+    await tester.pumpAndSettle();
+    return;
+  }
   await tester.ensureVisible(button);
   await tester.pumpAndSettle();
   await tester.tap(button);

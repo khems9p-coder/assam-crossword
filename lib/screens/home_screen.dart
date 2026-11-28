@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../services/app_state.dart';
 import '../services/auth_service.dart';
+import '../services/contact_service.dart';
 import '../services/daily_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_routes.dart';
@@ -30,6 +31,10 @@ class HomeScreen extends StatelessWidget {
     _MenuItem('My Progress', Icons.insights_rounded, AppRoutes.progress),
     _MenuItem('Achievements', Icons.emoji_events_rounded, AppRoutes.achievements),
     _MenuItem('Leaderboard', Icons.leaderboard_rounded, AppRoutes.leaderboard),
+  ];
+
+  /// Account and app pages, kept in the side menu (the icon at top left).
+  static const List<_MenuItem> _drawerItems = [
     _MenuItem('My Profile', Icons.person_rounded, AppRoutes.profile),
     _MenuItem('Settings', Icons.settings_rounded, AppRoutes.settings),
     _MenuItem('Feedback', Icons.feedback_rounded, AppRoutes.feedback),
@@ -47,6 +52,7 @@ class HomeScreen extends StatelessWidget {
         title: const Text(AppConstants.appName),
         actions: const [OfflineBadge()],
       ),
+      drawer: const _AppDrawer(items: _drawerItems),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -175,6 +181,90 @@ class _CurrentGameCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// The side menu opened from the icon at the top left of the dashboard.
+class _AppDrawer extends StatelessWidget {
+  final List<_MenuItem> items;
+
+  const _AppDrawer({required this.items});
+
+  void _go(BuildContext context, String route) {
+    Navigator.of(context).pop(); // close the menu first
+    Navigator.of(context).pushNamed(route);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Container(
+              color: AppColors.brand,
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              child: Row(
+                children: [
+                  AppLogo(
+                    size: 56,
+                    backgroundColor: AppColors.cream,
+                    iconColor: AppColors.forestGreen,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          AppConstants.appName,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          AuthService.instance.displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            for (final _MenuItem item in items)
+              ListTile(
+                leading: Icon(item.icon, color: AppColors.forestGreen),
+                title: Text(item.label),
+                onTap: () => _go(context, item.route),
+              ),
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.share_rounded, color: AppColors.forestGreen),
+              title: const Text('Share the app'),
+              onTap: () {
+                Navigator.of(context).pop();
+                ContactService.shareApp();
+              },
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Developed by ${AppConstants.developer}',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: AppColors.grey),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
     );
   }
 }
