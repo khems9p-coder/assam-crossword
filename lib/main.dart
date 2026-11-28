@@ -84,6 +84,9 @@ Future<void> _loadInBackground() async {
   }
 }
 
+/// The colour theme the screens were last painted with.
+AppPalette? _paintedPalette;
+
 class AssamCrosswordApp extends StatelessWidget {
   const AssamCrosswordApp({super.key});
 
@@ -94,6 +97,7 @@ class AssamCrosswordApp extends StatelessWidget {
     return ListenableBuilder(
       listenable: state,
       builder: (context, _) {
+        AppColors.palette = state.palette;
         return MaterialApp(
           title: AppConstants.appName,
           debugShowCheckedModeBanner: false,
@@ -110,8 +114,10 @@ class AssamCrosswordApp extends StatelessWidget {
             // Tell AppColors which mode is showing. When it changes,
             // repaint every screen so all colours switch together.
             final bool dark = Theme.of(context).brightness == Brightness.dark;
-            if (dark != AppColors.isDark) {
+            if (dark != AppColors.isDark ||
+                _paintedPalette != AppColors.palette) {
               AppColors.isDark = dark;
+              _paintedPalette = AppColors.palette;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 void rebuild(Element element) {
                   element.markNeedsBuild();

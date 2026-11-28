@@ -48,7 +48,7 @@ class ActiveClueBar extends StatelessWidget {
                           ? ''
                           : '${engine.numberOf(word)} ${word.direction.label}'
                               ' · ${word.length} letters',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: AppColors.gold,

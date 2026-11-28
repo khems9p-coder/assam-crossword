@@ -27,6 +27,7 @@ class CrosswordGrid extends StatelessWidget {
         return Center(
           child: Container(
             decoration: BoxDecoration(
+              color: AppColors.cell,
               border: Border.all(color: AppColors.forestGreen, width: 2),
             ),
             child: Column(

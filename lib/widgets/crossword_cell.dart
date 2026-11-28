@@ -43,7 +43,7 @@ class CrosswordCell extends StatelessWidget {
       );
     }
 
-    Color background = AppColors.surface;
+    Color background = AppColors.cell;
     if (isGiven) {
       background = AppColors.isDark
           ? Colors.grey.shade700

@@ -78,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   style: TextStyle(fontSize: 15, color: Colors.white70),
                 ),
                 const Spacer(),
-                const SizedBox(
+                SizedBox(
                   width: 28,
                   height: 28,
                   child: CircularProgressIndicator(

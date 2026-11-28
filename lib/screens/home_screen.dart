@@ -192,7 +192,7 @@ class _WelcomeHeader extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               colors: [AppColors.brand, AppColors.brandLight],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

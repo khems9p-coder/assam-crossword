@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../data/category_data.dart';
 import '../models/difficulty.dart';
 import '../models/player_stats.dart';
+import '../theme/app_theme.dart';
 import 'local_store.dart';
 
 /// The player's choices, stats and settings.
@@ -52,6 +53,7 @@ class AppState extends ChangeNotifier {
       if (theme == 'light' || theme == 'dark' || theme == 'system') {
         _themeChoice = theme as String;
       }
+      _palette = AppPalette.fromName(settings['palette']);
       final Object? scale = settings['textScale'];
       if (scale is num) {
         _textScale = scale.toDouble();
@@ -134,6 +136,17 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The colour theme: Classic, Twilight, Tea Garden or Sunrise.
+  AppPalette _palette = AppPalette.classic;
+
+  AppPalette get palette => _palette;
+
+  void setPalette(AppPalette value) {
+    _palette = value;
+    _saveSettings();
+    notifyListeners();
+  }
+
   void setTextScale(double value) {
     _textScale = value;
     _saveSettings();
@@ -151,6 +164,7 @@ class AppState extends ChangeNotifier {
     _vibrationOn = true;
     _textScale = 1.0;
     _themeChoice = 'system';
+    _palette = AppPalette.classic;
     notifyListeners();
   }
 
@@ -174,6 +188,7 @@ class AppState extends ChangeNotifier {
       'musicOn': _musicOn,
       'vibrationOn': _vibrationOn,
       'theme': _themeChoice,
+      'palette': _palette.name,
       'textScale': _textScale,
     }));
   }

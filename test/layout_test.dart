@@ -46,6 +46,15 @@ void main() {
     expect(find.byType(ClueList), findsOneWidget);
     expect(find.byType(ClueTabs), findsNothing);
 
+    // Phone held sideways: grid left, clue bar and keyboard right,
+    // with nothing covering the grid.
+    tester.view.physicalSize = const Size(850, 390);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(ClueList), findsNothing);
+    expect(find.byType(ActiveClueBar), findsOneWidget);
+    expect(find.text('Clues'), findsOneWidget);
+
     // Phone held upright: a Clues button opens the list.
     tester.view.physicalSize = const Size(400, 760);
     await tester.pumpAndSettle();

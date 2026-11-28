@@ -83,7 +83,7 @@ class _CelebrationDialogState extends State<CelebrationDialog>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.emoji_events_rounded,
                     color: AppColors.gold,
                     size: 56,
@@ -251,7 +251,7 @@ class _Piece {
     this.color,
   );
 
-  static const List<Color> _colors = [
+  static List<Color> get _colors => [
     AppColors.gold,
     AppColors.brand,
     Colors.redAccent,

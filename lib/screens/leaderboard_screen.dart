@@ -141,9 +141,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     return Card(
       margin: EdgeInsets.zero,
       child: ListTile(
-        leading: const CircleAvatar(
+        leading: CircleAvatar(
           backgroundColor: AppColors.brand,
-          child: Icon(Icons.person_rounded, color: Colors.white),
+          child: const Icon(Icons.person_rounded, color: Colors.white),
         ),
         title: const Text(
           'Your rank',

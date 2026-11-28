@@ -6,10 +6,14 @@ class GameKeyboard extends StatelessWidget {
   final ValueChanged<String> onLetter;
   final VoidCallback onBackspace;
 
+  /// Height of each key. Smaller on phones held sideways.
+  final double keyHeight;
+
   const GameKeyboard({
     super.key,
     required this.onLetter,
     required this.onBackspace,
+    this.keyHeight = 46,
   });
 
   static const List<String> _rows = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
@@ -37,6 +41,7 @@ class GameKeyboard extends StatelessWidget {
                           flex: 2,
                           child: _Key(
                             label: letter,
+                            height: keyHeight,
                             onTap: () => onLetter(letter),
                           ),
                         ),
@@ -47,6 +52,7 @@ class GameKeyboard extends StatelessWidget {
                           child: _Key(
                             icon: Icons.backspace_outlined,
                             tooltip: 'Backspace',
+                            height: keyHeight,
                             onTap: onBackspace,
                           ),
                         ),
@@ -65,9 +71,16 @@ class _Key extends StatelessWidget {
   final String? label;
   final IconData? icon;
   final String? tooltip;
+  final double height;
   final VoidCallback onTap;
 
-  const _Key({this.label, this.icon, this.tooltip, required this.onTap});
+  const _Key({
+    this.label,
+    this.icon,
+    this.tooltip,
+    this.height = 46,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +102,7 @@ class _Key extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: onTap,
-          child: SizedBox(height: 46, child: Center(child: content)),
+          child: SizedBox(height: height, child: Center(child: content)),
         ),
       ),
     );

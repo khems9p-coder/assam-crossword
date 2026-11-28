@@ -486,6 +486,48 @@ class _GameScreenState extends State<GameScreen>
           builder: (context, constraints) {
             final double w = constraints.maxWidth;
             final double h = constraints.maxHeight;
+
+            // A phone held sideways is too short for grid, clue bar and
+            // keyboard one above the other. Put the grid on the left and
+            // the clue bar and keyboard on the right instead. The full
+            // clue list opens from the Clues button.
+            if (w > h && h < 480) {
+              final double keyHeight = ((h - 130) / 3 - 6).clamp(30.0, 46.0);
+              return SafeArea(
+                top: false,
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 11,
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: CrosswordGrid(engine: engine),
+                      ),
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(
+                      flex: 10,
+                      child: Column(
+                        children: [
+                          ActiveClueBar(engine: engine),
+                          _ProgressRow(
+                            engine: engine,
+                            onShowClues: () => _showClueSheet(engine),
+                          ),
+                          const Spacer(),
+                          GameKeyboard(
+                            onLetter: engine.enterLetter,
+                            onBackspace: engine.backspace,
+                            keyHeight: keyHeight,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
             // Side panel: big screens, or any screen held sideways.
             final bool side = w >= 900 || (w > h && w >= 640);
             // Clue tabs under the grid: tall screens such as tablets

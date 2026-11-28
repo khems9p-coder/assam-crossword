@@ -47,7 +47,7 @@ class DailyChallengeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [
                       AppColors.brand,
                       AppColors.brandLight,
@@ -74,7 +74,7 @@ class DailyChallengeScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       '${topic.name} · ${DailyService.difficulty.label}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: AppColors.gold,

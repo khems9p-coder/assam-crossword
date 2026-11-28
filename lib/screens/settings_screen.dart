@@ -134,6 +134,31 @@ class SettingsScreen extends StatelessWidget {
                         'Auto follows your device setting.',
                         style: TextStyle(fontSize: 13, color: AppColors.grey),
                       ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Colour theme',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final AppPalette p in AppPalette.values)
+                            ChoiceChip(
+                              avatar: _PaletteSwatch(palette: p),
+                              label: Text(p.label),
+                              selected: state.palette == p,
+                              onSelected: (_) => state.setPalette(p),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Twilight, Tea Garden and Sunrise use colourful '
+                        'glass-style screens.',
+                        style: TextStyle(fontSize: 13, color: AppColors.grey),
+                      ),
                     ],
                   ),
                 ),
@@ -226,6 +251,26 @@ class SettingsScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// A small round preview of a colour theme.
+class _PaletteSwatch extends StatelessWidget {
+  final AppPalette palette;
+
+  const _PaletteSwatch({required this.palette});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Color> colors =
+        palette.lightGradient ?? [palette.brand, palette.brandLight];
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(colors: [palette.brand, ...colors]),
+        border: Border.all(color: palette.accent, width: 2),
+      ),
     );
   }
 }

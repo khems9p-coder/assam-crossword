@@ -4,14 +4,14 @@ import '../theme/app_theme.dart';
 
 class AppLogo extends StatelessWidget {
   final double size;
-  final Color backgroundColor;
-  final Color iconColor;
+  final Color? backgroundColor;
+  final Color? iconColor;
 
   const AppLogo({
     super.key,
     this.size = 120,
-    this.backgroundColor = AppColors.brand,
-    this.iconColor = AppColors.gold,
+    this.backgroundColor,
+    this.iconColor,
   });
 
   @override
@@ -20,13 +20,13 @@ class AppLogo extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: backgroundColor ?? AppColors.brand,
         borderRadius: BorderRadius.circular(size * 0.23),
       ),
       child: Icon(
         Icons.grid_on_rounded,
         size: size * 0.6,
-        color: iconColor,
+        color: iconColor ?? AppColors.gold,
       ),
     );
   }
